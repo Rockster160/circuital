@@ -1,0 +1,4 @@
+rails _8.0.0_ new circuital --database=postgresql --skip-turbolinks --skip-hotwire
+cd circuital
+bundle install
+rails db:create
