@@ -18,7 +18,9 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app %>
+    <%#= stylesheet_link_tag :app %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pages/#{controller_name}/#{action_name}", "data-turbo-track": "reload", media: "all" if File.exist?(Rails.root.join("app/assets/stylesheets/pages/#{controller_name}/#{action_name}.css")) %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 

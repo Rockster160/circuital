@@ -1,3 +1,23 @@
-export default function Welcome() {
-  console.log("Welcome to challenges!")
-}
+const typewriter = document.querySelector("h1");
+const text = typewriter.innerText;
+typewriter.innerText = "";
+
+let index = 0;
+let direction = "add";
+setInterval(() => {
+  if (direction === "add") {
+    if (index < text.length) {
+      typewriter.textContent += text[index];
+      index += 1;
+    } else {
+      direction = "remove";
+    }
+  } else {
+    if (index > 0) {
+      typewriter.textContent = text.slice(0, index - 1);
+      index -= 1;
+    } else {
+      direction = "add";
+    }
+  }
+}, 100);
