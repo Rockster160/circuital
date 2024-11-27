@@ -22,7 +22,10 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body data-controller="<%= controller_name %>" data-action="<%= action_name %>">
+    <% flash.each do |key, message| %>
+      <div class="<%= key %>"><%= message %></div>
+    <% end %>
     <%= yield %>
   </body>
 </html>

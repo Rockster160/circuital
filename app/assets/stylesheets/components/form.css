@@ -1,0 +1,25 @@
+.button {
+  display: block;
+  margin: 20px 0;
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #CCC;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  border-color: #007BFF;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
