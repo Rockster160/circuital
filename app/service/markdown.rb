@@ -6,42 +6,47 @@ class Markdown
   def initialize(text)
     @raw = text
     @text = text
+    @tokens = {}
   end
 
   def to_html
     @text = ::ERB::Util.html_escape(@text)
-    replace_wrap({ /```(?<language>\w*)\n?/ => /\n?```/ }, :codeblock)
-    replace_wrap({ "`" => "`" }, :code)
+    # replace_wrap({ /```(?<language>\w*)\n?/ => /\n?```/ }, :codeblock)
     replace(
+      /```(?<language>\w*)\n?(?<content>.*?)\n?```/m => code_block_wrapper,
       /^# (.*?)$/           => wrap('\1', :h1),
       /^## (.*?)$/          => wrap('\1', :h2),
       /^### (.*?)$/         => wrap('\1', :h3),
       /^#### (.*?)$/        => wrap('\1', :h4),
       /^##### (.*?)$/       => wrap('\1', :h5),
       /^###### (.*?)$/      => wrap('\1', :h6),
+      /`(.*?)`/             => wrap('\1', :code),
       /\*(.*?)\*/           => wrap('\1', :strong),
       /_(.*?)_/             => wrap('\1', :em),
       /~(.*?)~/             => wrap('\1', :del),
       /!\[(.*?)\]\((.*?)\)/ => wrap(nil, :img, src: '\2', alt: '\1'),
       /\[(.*?)\]\((.*?)\)/  => wrap('\1', :a, href: '\2'),
-      /^( *\* (?:.*?\n))+/m => -> (match) {
-        content = match[0]
-        lines = content.split("\n").map { |li| wrap(li[/^\s*\* (.*?)$/, 1] || li, :li) }.join.html_safe
-        wrap(lines, :ul) + "\n"
-      },
-      /^( *1[\.\)-:]? +(?:.*?\n))+/m => -> (match) {
-        content = match[0]
-        lines = content.split("\n").map { |li| wrap(li[/^\s*1[\.\)-:]? +(.*?)$/, 1] || li, :li) }.join.html_safe
-        wrap(lines, :ol) + "\n"
-      },
+      /^( *\* (?:.*?\n))+/m          => ul_wrapper,
+      /^( *1[\.\)-:]? +(?:.*?\n))+/m => ol_wrapper,
+      /\[\/blogs\/(\d+)\]/m          => internal_link_wrapper,
+      /^(\|(.+?\|)+ *(\n|\z))+/m     => table_wrapper,
+      /\n{3,}/m => ->(match) { "\n\n" + "</br>"*(match[0].length-2) },
     )
-      # Do this at the end, and make sure to ignore any already wrapped links
-      # /\b(https?:\/\/\S+)\b/ => wrap('\1', :a, href: '\1'),
-    wrap(@text.html_safe, :div, class: "markdown-wrapper").html_safe
-  end
 
-  def p(content, **opts)
-    wrap(content, :p, opts)
+    # Wrap plain text in paragraphs
+    rsub(/\n\n([^\n].*?[^\n]?)\n\n/, wrap('\1', :p) + "\n\n") # Wrap paragraphs
+    @text.gsub!(/\n\n([^\n]+)\z/, wrap('\1', :p)) # Wrap last paragraph
+
+    # linkify urls, but tokenize links and images so we don't double-link
+    tokenize_tags(:a, :img)
+    @text.gsub!(/\b(https?:\/\/\S+)\b/) { |found| wrap(found, :a, href: found) }
+
+    # Tokenized blocks are stand-alone, so they don't need to be wrapped in paragraphs
+    @text.gsub!(/<p>(%%\w{8}%%)<\/p>/, '\1')
+
+    untokenize! # Replace tokenized content
+
+    wrap(@text.strip.html_safe, :div, class: "markdown-wrapper")
   end
 
   def replace(replacements)
@@ -120,5 +125,72 @@ class Markdown
       escapes = str[...idx][/\\*\z/].length
       return { start_idx: idx, end_idx: idx+Regexp.last_match.to_s.length-1, match: Regexp.last_match } if escapes.even?
     }
+  end
+
+  def code_block_wrapper
+    ->(match) {
+      language = match[:language].presence
+      tokenize(wrap(match[:content].html_safe, :codeblock, data: { language: language }))
+    }
+  end
+
+  def ol_wrapper
+    -> (match) {
+      content = match[0]
+      lines = content.split("\n").map { |li| wrap(li[/^\s*1[\.\)-:]? +(.*?)$/, 1] || li, :li) }.join.html_safe
+      wrap(lines, :ol) + "\n"
+    }
+  end
+
+  def ul_wrapper
+    ->(match) {
+      content = match[0]
+      lines = content.split("\n").map { |li| wrap(li[/^\s*\* (.*?)$/, 1] || li, :li) }.join.html_safe
+      wrap(lines, :ul) + "\n"
+    }
+  end
+
+  def internal_link_wrapper
+    -> (match) {
+      id = match[1]
+      blog = Blog.find_by(id: id)
+      next match[0] if blog.nil?
+      wrap(blog.title, :a, href: "/blogs/#{id}")
+    }
+  end
+
+  def table_wrapper
+    ->(match) {
+      rows = match[0].strip.split(/\s*\n\s*/).map { |row|
+        cells = row[/^\s*\|(.*?)\|\s*$/, 1].split(/\|/).map { |cell| wrap(cell.strip.html_safe, :td) }.join
+        wrap(cells.html_safe, :tr)
+      }.join
+      wrap(rows.html_safe, :table)
+    }
+  end
+
+  def rsub(pattern, replacement)
+    @text.sub!(pattern, replacement) while @text.match?(pattern)
+  end
+
+  def tokenize(content)
+    generate_token.tap { |token| @tokens[token] = content }
+  end
+
+  def untokenize!
+    @tokens.each { |token, content| @text.gsub!(token, content) }
+  end
+
+  def tokenize_tags(*tags)
+    tags.each do |tag|
+      @text.gsub!(/((?:<p>)?<#{tag}[^<]*?<\/#{tag}>(?:<\/p>)?)/) { |found| tokenize(found) }
+    end
+  end
+
+  def generate_token
+    loop do
+      token = SecureRandom.hex(4)
+      return "%%#{token}%%" unless @raw.include?(token)
+    end
   end
 end
