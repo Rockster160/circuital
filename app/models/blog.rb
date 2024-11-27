@@ -1,5 +1,5 @@
 class Blog < ApplicationRecord
   def to_html
-    content
+    Markdown.new(content).to_html
   end
 end

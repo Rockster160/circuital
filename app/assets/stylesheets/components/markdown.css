@@ -1,0 +1,21 @@
+.markdown-wrapper {
+  code, codeblock {
+    background-color: #0F0F0F;
+    border: 1px solid #DDD;
+    border-radius: 3px;
+    color: lime;
+    font-family: Consolas, "Liberation Mono", Courier, monospace;
+    font-size: 14px;
+  }
+
+  codeblock {
+    display: block;
+    margin: 0.5em 0;
+    padding: 0.5em;
+    white-space: pre;
+  }
+
+  code {
+    padding: 0.2em;
+  }
+}
