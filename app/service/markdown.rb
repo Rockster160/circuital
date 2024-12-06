@@ -11,8 +11,8 @@ class Markdown
 
   def to_html
     @text = ::ERB::Util.html_escape(@text)
-    # replace_wrap({ /```(?<language>\w*)\n?/ => /\n?```/ }, :codeblock)
     replace(
+      /\r/ => "",
       /```(?<language>\w*)\n?(?<content>.*?)\n?```/m => code_block_wrapper,
       /^# (.*?)$/           => wrap('\1', :h1),
       /^## (.*?)$/          => wrap('\1', :h2),
@@ -20,23 +20,24 @@ class Markdown
       /^#### (.*?)$/        => wrap('\1', :h4),
       /^##### (.*?)$/       => wrap('\1', :h5),
       /^###### (.*?)$/      => wrap('\1', :h6),
-      /^\s*(-{3,}|={3,})\s*$/ => content_tag(:hr),
+      /^\s*(-{3,}|={3,})\s*$/ => tag(:hr),
       /`(.*?)`/             => wrap('\1', :code),
       /\*(.*?)\*/           => wrap('\1', :strong),
       /_(.*?)_/             => wrap('\1', :em),
       /~(.*?)~/             => wrap('\1', :del),
       /!\[(.*?)\]\((.*?)\)/ => wrap(nil, :img, src: '\2', alt: '\1'),
-      /\[(.*?)\]\((.*?)\)/  => wrap('\1', :a, href: '\2'),
-      /^( *\* (?:.*?\n))+/m          => ul_wrapper,
-      /^( *1[\.\)-:]? +(?:.*?\n))+/m => ol_wrapper,
-      /\[\/blogs\/(\d+)\]/m          => internal_link_wrapper,
-      /^(\|(.+?\|)+ *(\n|\z))+/m     => table_wrapper,
+      /\[(.*?)\]\((.*?)\)/  => wrap('\1', :a, href: '\2', target: :_blank),
+      /\[\/blogs\/(\d+)\]/             => internal_link_wrapper,
+      /^( *\* (?:.*?\n))+/m            => ul_wrapper,
+      /^( *1[\.\)-:]? +(?:.*?\n))+/m   => ol_wrapper,
+      /^ *(\|([^\n]+?\|)+ *(\n|\z))+/m => table_wrapper,
       /\n{3,}/m => ->(match) { "\n\n" + "</br>"*(match[0].length-2) },
     )
 
     # Wrap plain text in paragraphs
     rsub(/\n\n([^\n].*?[^\n]?)\n\n/, wrap('\1', :p) + "\n\n") # Wrap paragraphs
-    @text.gsub!(/\n\n([^\n]+)\z/, wrap('\1', :p)) # Wrap last paragraph
+    @text.gsub!(/\n\n(.+)\z/m, wrap('\1', :p)) # Wrap last paragraph
+    @text.gsub!(/\n/, tag(:br)) # Line breaks
 
     # linkify urls, but tokenize links and images so we don't double-link
     tokenize_tags(:a, :img)
@@ -53,9 +54,7 @@ class Markdown
   def replace(replacements)
     replacements.each do |pattern, replacement|
       if replacement.is_a?(Proc)
-        @text.gsub!(pattern) do |found|
-          replacement.call(Regexp.last_match)
-        end
+        @text.gsub!(pattern) { |found| replacement.call(Regexp.last_match) }
       else
         @text.gsub!(pattern, replacement)
       end
@@ -63,7 +62,10 @@ class Markdown
   end
 
   def wrap(content, tag, **opts, &block)
-    content_tag(tag, block_given? ? block.call(content.to_s) : content.to_s, opts)
+    text = block.call(content.to_s) if block_given?
+    text ||= content.join if content.is_a?(::Array)
+    text ||= content.to_s
+    content_tag(tag, text.html_safe, opts)
   end
 
   # Calls block with matching content and pair data
@@ -138,7 +140,7 @@ class Markdown
   def ol_wrapper
     -> (match) {
       content = match[0]
-      lines = content.split("\n").map { |li| wrap(li[/^\s*1[\.\)-:]? +(.*?)$/, 1] || li, :li) }.join.html_safe
+      lines = content.split("\n").map { |li| wrap(li[/^\s*1[\.\)-:]? +(.*?)$/, 1] || li, :li) }
       wrap(lines, :ol) + "\n"
     }
   end
@@ -146,7 +148,7 @@ class Markdown
   def ul_wrapper
     ->(match) {
       content = match[0]
-      lines = content.split("\n").map { |li| wrap(li[/^\s*\* (.*?)$/, 1] || li, :li) }.join.html_safe
+      lines = content.split("\n").map { |li| wrap(li[/^\s*\* (.*?)$/, 1] || li, :li) }
       wrap(lines, :ul) + "\n"
     }
   end
@@ -156,6 +158,7 @@ class Markdown
       id = match[1]
       blog = Blog.find_by(id: id)
       next match[0] if blog.nil?
+
       wrap(blog.title, :a, href: "/blogs/#{id}")
     }
   end
@@ -163,10 +166,11 @@ class Markdown
   def table_wrapper
     ->(match) {
       rows = match[0].strip.split(/\s*\n\s*/).map { |row|
-        cells = row[/^\s*\|(.*?)\|\s*$/, 1].split(/\|/).map { |cell| wrap(cell.strip.html_safe, :td) }.join
-        wrap(cells.html_safe, :tr)
-      }.join
-      wrap(rows.html_safe, :table)
+        row = row[/^\s*\|(.*?)\|\s*$/, 1] || row
+        cells = row.split(/\|/).map { |cell| wrap(cell.to_s.strip.html_safe, :td) }
+        wrap(cells, :tr)
+      }
+      wrap(rows, :table)
     }
   end
 
