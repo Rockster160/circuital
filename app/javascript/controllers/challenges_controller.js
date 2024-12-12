@@ -3,7 +3,9 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="challenges"
 export default class extends Controller {
   connect() {
-    const typewriter = document.querySelector("h1");
+    if (this.element.getAttribute("data-action") !== "welcome") { return }
+    const typewriter = this.element.querySelector("h1");
+
     const text = typewriter.innerText;
     typewriter.innerText = "";
 

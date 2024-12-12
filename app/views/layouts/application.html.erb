@@ -27,5 +27,6 @@
       <div class="<%= key %>"><%= message %></div>
     <% end %>
     <%= yield %>
+    <%= yield :after_body_js %>
   </body>
 </html>

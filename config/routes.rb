@@ -3,5 +3,7 @@ Rails.application.routes.draw do
 
   root "challenges#welcome"
 
+  get "space-game" => "challenges#space_game"
+
   resources :blogs
 end

@@ -16,7 +16,7 @@ html, body {
   }
 }
 
-/* Remove default a styles */
+/* Remove default <a> styles */
 a {
   text-decoration: none;
   display: inline-block;
