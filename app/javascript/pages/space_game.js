@@ -6,10 +6,7 @@ const ctx = canvas.getContext("2d");
 let width = canvas.clientWidth;
 let height = canvas.clientHeight;
 
-const player = Player.instance
-player.x = width/2;
-player.y = height/2;
-player.width = 10;
+const player = new Player(canvas)
 
 const observer = new ResizeObserver((entries) => {
   width = canvas.clientWidth;
@@ -18,7 +15,6 @@ const observer = new ResizeObserver((entries) => {
 observer.observe(canvas)
 
 function render(time) {
-  console.log("Hi")
   canvas.width = width;
   canvas.height = height;
 

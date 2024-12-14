@@ -1,9 +1,4 @@
-html {
-  background-color: blue;
-}
 html:has(body[data-controller=challenges][data-action=space_game]) {
-  background-color: red;
-
   canvas {
     display: block;
     width: 100%;

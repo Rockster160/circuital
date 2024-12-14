@@ -15,9 +15,10 @@ export default class Player {
     return Player.#instance
   }
 
-  constructor() {
-    this.x = 0
-    this.y = 0
+  constructor(canvas) {
+    this.canvas = canvas
+    this.x = canvas.width/2;
+    this.y = canvas.height/2;
     this.width = 10
     this.facingAngle = 0
     this.momentumAngle = 0
@@ -28,6 +29,7 @@ export default class Player {
     this.brakes = 0.07;
 
     this.thrust = 0
+    Player.#instance = this
   }
 
   static tick(ctx) {
@@ -68,8 +70,8 @@ export default class Player {
       }
     }
 
-    player.x += Math.cos(player.momentumAngle) * player.momentum
-    player.y += Math.sin(player.momentumAngle) * player.momentum
+    player.x = (player.x + (Math.cos(player.momentumAngle) * player.momentum)) % this.canvas.width
+    player.y = (player.y + (Math.sin(player.momentumAngle) * player.momentum)) % this.canvas.height
 
     if (player.momentum > 0) {
       player.applyForce(-player.friction, player.momentumAngle)
@@ -89,8 +91,9 @@ export default class Player {
 
     ctx.font = "20px Arial";
     ctx.fillStyle = "#FFF";
-    ctx.fillText(`momentum: ${player.momentum}, direction: ${player.momentumAngle.toFixed(2)}`, 10, 30)
+    ctx.fillText(`momentum: ${player.momentum.toFixed(2)}, direction: ${player.momentumAngle.toFixed(2)}`, 10, 30)
     ctx.fillText(`thrust: ${player.thrust}, facing: ${player.facingAngle.toFixed(2)}`, 10, 60)
+    ctx.fillText(`x: ${player.x.toFixed(2)}, y: ${player.y.toFixed(2)}`, 10, 90)
 
     ctx.fillStyle = "#0160FF";
     ctx.beginPath();
