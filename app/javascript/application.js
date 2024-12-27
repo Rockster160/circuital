@@ -13,3 +13,4 @@ function elastic(textarea) {
   textarea.style.height = "5px";
   textarea.style.height = (textarea.scrollHeight+5) + "px";
 }
+import "channels"

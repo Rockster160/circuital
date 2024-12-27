@@ -5,7 +5,7 @@
 
   <h2 class="text-center"><%= @list.name %></h2>
 
-  <%= form_with(model: [@list, ListItem.new], remote: true) do |f| %>
+  <%= form_with(model: [@list, ListItem.new], local: true, html: { id: "list-item-form" }) do |f| %>
     <div class="field">
       <div class="flex-row">
         <%= f.text_field :name, class: "form-control" %>
@@ -14,9 +14,7 @@
     </div>
   <% end %>
 
-  <% @list_items.each do |list_item| %>
-    <%= link_to list_list_item_path(@list, list_item), class: "item-card" do %>
-      <div class="item-title"><%= list_item.name %></div>
-    <% end %>
-  <% end %>
+  <div id="list-items" data-turbo-prefetch="false">
+    <%= render partial: "list_items/index" %>
+  </div>
 </div>

@@ -1,0 +1,5 @@
+<% @list_items.each do |list_item| %>
+  <%= link_to list_list_item_path(@list, list_item), class: "item-card" do %>
+    <div class="item-title"><%= list_item.name %></div>
+  <% end %>
+<% end %>

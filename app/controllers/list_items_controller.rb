@@ -1,14 +1,4 @@
 class ListItemsController < ApplicationController
-  # after_action :s erialize
-
-  # def index
-  #   @list_items = list.list_items.all
-  # end
-
-  # def show
-  #   @list_item = list.list_items.find(params[:id])
-  # end
-
   def create
     @list_item = list.list_items.create!(list_item_params)
 
@@ -34,9 +24,13 @@ class ListItemsController < ApplicationController
   private
 
   def serialize
-    render json: {
-      data: Array.wrap(@list_item || @list_items),
-    }
+    @list_items = @list.list_items
+
+    ListChannel.broadcast_to(@list, {
+      list: @list.as_json,
+      items: @list.list_items,
+      html: render_to_string(partial: "list_items/index"),
+    })
   end
 
   def list
