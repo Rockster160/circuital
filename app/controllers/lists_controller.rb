@@ -6,7 +6,7 @@ class ListsController < ApplicationController
 
   def show
     @list = List.find(params[:id])
-    @list_items = @list.list_items
+    @list_items = @list.list_items.ordered
   end
 
   def new

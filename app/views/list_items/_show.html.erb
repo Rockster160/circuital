@@ -1,0 +1,6 @@
+<% template ||= false %>
+<% list_item ||= nil %>
+
+<%= link_to template ? "" : list_list_item_path(@list, list_item), class: "item-card #{"pending" if template || list_item.id == 18}" do %>
+  <div class="item-title"><%= template ? "" : list_item.name %></div>
+<% end %>

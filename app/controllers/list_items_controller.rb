@@ -24,7 +24,7 @@ class ListItemsController < ApplicationController
   private
 
   def serialize
-    @list_items = @list.list_items
+    @list_items = @list.list_items.ordered
 
     ListChannel.broadcast_to(@list, {
       list: @list.as_json,

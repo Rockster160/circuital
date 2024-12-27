@@ -1,17 +1,34 @@
 import consumer from "channels/consumer"
 
 const id = window.location.pathname.match(/lists\/(\d+)/)[1]
-consumer.subscriptions.create({ channel: "ListChannel", list_id: id }, {
-  connected() {
-    console.log("Connected!");
-  },
+const form = document.querySelector("#list-item-form")
+const itemsWrapper = document.querySelector("#list-items")
 
-  disconnected() {
-    console.log("Disconnected!");
-  },
+consumer.subscriptions.create({ channel: "ListChannel", list_id: id }, {
+  // connected() {
+  //   console.log("Connected!");
+  // },
+
+  // disconnected() {
+  //   console.log("Disconnected!");
+  // },
 
   received(data) {
-    console.log("Received data!", data);
-    document.querySelector("#list-items").innerHTML = data.html;
+    itemsWrapper.innerHTML = data.html;
   }
 });
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const input = form.querySelector("input[type=text]");
+  const name = input.value.trim()
+
+  if (name === "") { return }
+
+  const template = document.querySelector("template#list-item-template").content.cloneNode(true)
+  template.querySelector(".item-title").textContent = name
+  itemsWrapper.prepend(template)
+
+  form.submit()
+  input.value = ""
+})

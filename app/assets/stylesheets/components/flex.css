@@ -3,3 +3,8 @@
   flex-direction: row;
   align-items: center;
 }
+
+.justify-between {
+  display: flex;
+  justify-content: space-between;
+}
