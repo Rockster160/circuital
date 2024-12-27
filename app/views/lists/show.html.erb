@@ -1,0 +1,22 @@
+<div class="container">
+  <div class="float-right">
+    <%= link_to "Edit", edit_list_path(@list) %>
+  </div>
+
+  <h2 class="text-center"><%= @list.name %></h2>
+
+  <%= form_with(model: [@list, ListItem.new], remote: true) do |f| %>
+    <div class="field">
+      <div class="flex-row">
+        <%= f.text_field :name, class: "form-control" %>
+        <%= f.submit "Add Item", class: :button %>
+      </div>
+    </div>
+  <% end %>
+
+  <% @list_items.each do |list_item| %>
+    <%= link_to list_list_item_path(@list, list_item), class: "item-card" do %>
+      <div class="item-title"><%= list_item.name %></div>
+    <% end %>
+  <% end %>
+</div>

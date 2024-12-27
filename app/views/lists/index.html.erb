@@ -1,0 +1,9 @@
+<div class="container">
+  <%= link_to "Create New List", new_list_path, class: :button %>
+
+  <% @lists.each do |list| %>
+    <%= link_to list_path(list), class: "item-card" do %>
+      <div class="item-title"><%= list.name %></div>
+    <% end %>
+  <% end %>
+</div>

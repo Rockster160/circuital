@@ -2,8 +2,8 @@
   <%= link_to "Create New Blog", new_blog_path, class: :button %>
 
   <% @blogs.each do |blog| %>
-    <%= link_to blog_path(blog), class: "blog-card" do %>
-      <div class="blog-title"><%= blog.title %></div>
+    <%= link_to blog_path(blog), class: "item-card" do %>
+      <div class="item-title"><%= blog.title %></div>
     <% end %>
   <% end %>
 </div>
