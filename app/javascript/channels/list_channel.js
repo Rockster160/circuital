@@ -27,10 +27,15 @@ consumer.subscriptions.create({ channel: "ListChannel", list_id: id }, {
   }
 });
 
+document.addEventListener("click", (evt) => {
+  const item = evt.target.closest("a.list-item")
+  if (item) { evt.preventDefault() }
+})
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const input = form.querySelector("input[type=text]");
-  const name = input.value.trim()
+  const newItemInput = form.querySelector("input[type=text]");
+  const name = newItemInput.value.trim()
 
   if (name === "") { return }
 
@@ -38,8 +43,10 @@ form.addEventListener("submit", (event) => {
   template.querySelector(".item-title").textContent = name
   itemsWrapper.prepend(template)
 
-  form.submit()
-  input.value = ""
+  fetchJson(form.action, { method: "POST", body: { name } }).catch((error) => {
+    console.error("[ERROR] Failed to create:", error);
+  })
+  newItemInput.value = ""
 })
 
 document.addEventListener("mousedown", (event) => {
@@ -79,10 +86,6 @@ document.addEventListener("mousedown", (event) => {
   }, 500)
   item.addEventListener("dragstart", removeListeners)
   item.addEventListener("mouseup", markComplete)
-})
-
-document.addEventListener("click", (event) => {
-  event.target.closest("a.list-item")?.preventDefault()
 })
 
 function editItem(item) {
