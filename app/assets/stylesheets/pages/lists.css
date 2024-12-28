@@ -6,12 +6,17 @@ html:has(body[data-controller=lists]) {
       .item-title {
         font-size: 1em;
         margin-bottom: 0;
+        width: 100%;
+
+        input {
+          margin: 0;
+        }
       }
 
       .item-actions {
         position: relative;
 
-        .item-delete {
+        .delete-item {
           position: absolute;
           text-align: center;
           top: -5px;
@@ -36,7 +41,7 @@ html:has(body[data-controller=lists]) {
         }
 
         .item-actions {
-          .item-delete {
+          .delete-item {
             background-color: #393939;
           }
         }
@@ -49,6 +54,30 @@ html:has(body[data-controller=lists]) {
         .item-title {
           color: #777;
           font-size: 0.8em;
+        }
+
+        .item-actions {
+          display: none;
+        }
+      }
+
+      &.toggling {
+        background-color: #2E4E2E;
+        border-color: #334333;
+
+        .item-title {
+          color: #787;
+        }
+      }
+
+      &.deleting {
+        background-color: #6E2E2E;
+        border-color: #533333;
+
+        .item-title {
+          color: #B77;
+          text-decoration: line-through;
+          font-style: italic;
         }
 
         .item-actions {

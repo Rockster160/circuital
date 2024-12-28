@@ -5,9 +5,9 @@
 <% class_list << :pending if list_item.id.blank? %>
 <% class_list << :completed if list_item.completed? %>
 
-<%= link_to item_path, id: "list-item-#{list_item.id}", class: "item-card justify-between list-item #{class_list.join(" ")}" do %>
+<%= link_to item_path, id: "list-item-#{list_item.id}", class: "item-card justify-between list-item #{class_list.join(" ")}", data: { item_id: list_item.id } do %>
   <div class="item-title"><%= list_item.name %></div>
   <div class="item-actions">
-    <span class="item-delete">❌</span>
+    <span class="delete-item">❌</span>
   </div>
 <% end %>

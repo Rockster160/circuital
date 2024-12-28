@@ -34,11 +34,10 @@ class ListItemsController < ApplicationController
       item_html: render_to_string(partial: "list_items/index", formats: :html, layout: false),
     })
 
-    respond_to do |format|
-      format.json { render json: {
-        data: @list_items,
-      } }
-    end
+    render json: {
+      list: @list.as_json,
+      data: @list_items,
+    }
   end
 
   def list

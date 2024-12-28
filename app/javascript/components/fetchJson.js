@@ -1,16 +1,27 @@
-export default function fetchJson(url, opts = {}) {
+export default function fetchJson(url, opts={}) {
   // Ensure headers object exists
   opts.headers = opts.headers || {};
 
-  // Add JSON content-type headers if not already provided
   if (!opts.headers["Content-Type"]) {
-    opts.headers["Content-Type"] = "application/json";
+    if (opts.body instanceof FormData) {
+      opts.headers["Content-Type"] = "multipart/form-data";
+    } else {
+      opts.headers["Content-Type"] = "application/json";
+    }
   }
+
   if (!opts.headers["Accept"]) {
-    opts.headers["Accept"] = "application/json";
+    if (opts.body instanceof FormData) {
+      opts.headers["Accept"] = "multipart/form-data";
+    } else {
+      opts.headers["Accept"] = "application/json";
+    }
   }
-  if (typeof opts.body === "object") {
-    opts.body = JSON.stringify(opts.body);
+
+  if (opts.headers["Content-Type"] == "application/json") {
+    if (typeof opts.body === "object" && !(opts.body instanceof FormData)) {
+      opts.body = JSON.stringify(opts.body);
+    }
   }
 
   return fetch(url, opts).then(async (res) => {
@@ -22,7 +33,6 @@ export default function fetchJson(url, opts = {}) {
     // Parse the JSON, errors here will be caught by the .catch block
     const json = await res.json();
     return json;
-    // return { json, res };
   }).catch((err) => {
     // Handle any error (network, parsing, etc.)
     throw new Error(`Fetch error: ${err.message}`);

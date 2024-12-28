@@ -1,10 +1,10 @@
 <div class="container">
   <div class="justify-between">
     <%= link_to "← Lists", lists_path %>
-    <%= link_to "Edit", edit_list_path(@list) %>
+    <%= link_to "Edit", edit_list_path(@list), class: "edit-list" %>
   </div>
 
-  <h2 class="text-center"><%= @list.name %></h2>
+  <h2 class="text-center list-title"><%= @list.name %></h2>
 
   <%= form_with(model: [@list, ListItem.new], local: true, html: { id: "list-item-form" }) do |f| %>
     <div class="field">
@@ -15,6 +15,7 @@
     </div>
   <% end %>
 
+  <hr>
 
   <template id="list-item-template">
     <%= render partial: "list_items/show", locals: { template: true } %>

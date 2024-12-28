@@ -1,9 +1,11 @@
 import consumer from "channels/consumer"
 import fetchJson from "components/fetchJson";
 
-const id = window.location.pathname.match(/lists\/(\d+)/)[1]
+const listsPath = window.location.pathname.match(/lists\/(\d+)/)
+const id = listsPath && listsPath[1]
 const form = document.querySelector("#list-item-form")
 const itemsWrapper = document.querySelector("#list-items")
+let clickTimeout = null
 
 consumer.subscriptions.create({ channel: "ListChannel", list_id: id }, {
   // connected() {
@@ -15,6 +17,10 @@ consumer.subscriptions.create({ channel: "ListChannel", list_id: id }, {
   // },
 
   received(data) {
+    if (data.list.name) {
+      document.querySelector(".list-title").innerText = data.list.name;
+    }
+
     if (data.item_html) {
       itemsWrapper.innerHTML = data.item_html;
     }
@@ -36,28 +42,79 @@ form.addEventListener("submit", (event) => {
   input.value = ""
 })
 
-document.addEventListener("click", (event) => {
-  const listItem = event.target.closest("a.list-item")
+document.addEventListener("mousedown", (event) => {
+  const target = event.target
+  const item = target.closest(".list-item")
+  if (!item) { return }
 
-  const deleteItem = event.target.closest(".item-delete")
+  const deleteItem = target.closest(".delete-item")
   if (deleteItem) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    fetchJson(listItem.href, { method: "DELETE" }).catch((error) => {
+    item.classList.add("deleting")
+    fetchJson(item.href, { method: "DELETE" }).catch((error) => {
       console.error("[ERROR] Failed to destroy:", error);
     });
     return false;
   }
 
-  if (listItem) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    const completed = listItem.classList.contains("completed")
-    fetchJson(listItem.href, { method: "PATCH", body: { completed: !completed } }).catch((error) => {
+  function markComplete() {
+    removeListeners()
+    item.classList.add("toggling")
+    const completed = item.classList.contains("completed")
+    fetchJson(item.href, { method: "PATCH", body: { completed: !completed } }).catch((error) => {
       console.error("[ERROR] Failed to mark completed:", error);
     });
     return false;
   }
+
+  function removeListeners() {
+    clearTimeout(clickTimeout)
+    item.removeEventListener("dragstart", removeListeners)
+    item.removeEventListener("mouseup", markComplete)
+  }
+
+  clearTimeout(clickTimeout)
+  clickTimeout = setTimeout(() => {
+    editItem(item)
+    removeListeners()
+  }, 500)
+  item.addEventListener("dragstart", removeListeners)
+  item.addEventListener("mouseup", markComplete)
 })
+
+document.addEventListener("click", (event) => {
+  event.target.closest("a.list-item")?.preventDefault()
+})
+
+function editItem(item) {
+  const value = item.querySelector(".item-title").textContent
+  const input = document.createElement("input")
+
+  input.classList.add("form-control", "edit-list-field")
+  input.type = "text"
+  input.dataset.originalValue = value
+  input.value = value
+
+  function save() {
+    input.setAttribute("disabled", "disabled")
+    fetchJson(item.href, { method: "PATCH", body: { name: input.value } }).then(() => {
+      item.innerText = input.value
+    }).catch((error) => {
+      input.removeAttribute("disabled", "disabled")
+      console.error("[ERROR] Failed to update name:", error);
+    });
+  }
+
+  item.innerHTML = ""
+  item.appendChild(input)
+  input.focus()
+  input.select()
+
+  input.addEventListener("blur", save)
+  input.addEventListener("focusout", save)
+  input.addEventListener("keypress", (evt) => {
+    if (evt.key === "Enter") {
+      evt.preventDefault()
+      save()
+    }
+  })
+}

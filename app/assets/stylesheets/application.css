@@ -20,4 +20,13 @@ html, body {
 a {
   text-decoration: none;
   display: inline-block;
+
+  &[disabled] {
+    pointer-events: none;
+    color: #777;
+  }
+}
+
+.hidden {
+  display: none;
 }
