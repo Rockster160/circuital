@@ -30,6 +30,23 @@ html:has(body[data-controller=lists]) {
         }
       }
 
+      &.dragging {
+        background-color: #0160FF;
+        border-color: #333;
+
+        .item-title {
+          color: #777;
+          text-decoration: line-through;
+          font-style: italic;
+        }
+
+        .item-actions {
+          .delete-item {
+            background-color: #393939;
+          }
+        }
+      }
+
       &.completed {
         background-color: #2E2E2E;
         border-color: #333;

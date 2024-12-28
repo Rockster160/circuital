@@ -1,4 +1,4 @@
-import Player from "pages/space_game/player";
+import Player from "pages/challenges/space_game/player";
 
 const canvas = document.getElementById("space-game");
 const ctx = canvas.getContext("2d");
