@@ -1,4 +1,5 @@
 import consumer from "channels/consumer"
+import fetchJson from "components/fetchJson";
 
 const id = window.location.pathname.match(/lists\/(\d+)/)[1]
 const form = document.querySelector("#list-item-form")
@@ -14,7 +15,9 @@ consumer.subscriptions.create({ channel: "ListChannel", list_id: id }, {
   // },
 
   received(data) {
-    itemsWrapper.innerHTML = data.html;
+    if (data.item_html) {
+      itemsWrapper.innerHTML = data.item_html;
+    }
   }
 });
 
@@ -31,4 +34,30 @@ form.addEventListener("submit", (event) => {
 
   form.submit()
   input.value = ""
+})
+
+document.addEventListener("click", (event) => {
+  const listItem = event.target.closest("a.list-item")
+
+  const deleteItem = event.target.closest(".item-delete")
+  if (deleteItem) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    fetchJson(listItem.href, { method: "DELETE" }).catch((error) => {
+      console.error("[ERROR] Failed to destroy:", error);
+    });
+    return false;
+  }
+
+  if (listItem) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const completed = listItem.classList.contains("completed")
+    fetchJson(listItem.href, { method: "PATCH", body: { completed: !completed } }).catch((error) => {
+      console.error("[ERROR] Failed to mark completed:", error);
+    });
+    return false;
+  }
 })

@@ -13,4 +13,7 @@ class ListItem < ApplicationRecord
 
     update!(completed_at: at)
   end
+  def completed=(bool)
+    self.completed_at = bool ? Time.current : nil
+  end
 end

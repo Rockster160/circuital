@@ -8,6 +8,23 @@ html:has(body[data-controller=lists]) {
         margin-bottom: 0;
       }
 
+      .item-actions {
+        position: relative;
+
+        .item-delete {
+          position: absolute;
+          text-align: center;
+          top: -5px;
+          right: -5px;
+          font-size: 0.4em;
+          cursor: pointer;
+          background-color: green;
+          border-radius: 4px;
+          padding: 2px 4px;
+          background-color: #2E2E2E;
+        }
+      }
+
       &.completed {
         background-color: #2E2E2E;
         border-color: #333;
@@ -16,6 +33,12 @@ html:has(body[data-controller=lists]) {
           color: #777;
           text-decoration: line-through;
           font-style: italic;
+        }
+
+        .item-actions {
+          .item-delete {
+            background-color: #393939;
+          }
         }
       }
 
@@ -26,6 +49,10 @@ html:has(body[data-controller=lists]) {
         .item-title {
           color: #777;
           font-size: 0.8em;
+        }
+
+        .item-actions {
+          display: none;
         }
       }
     }

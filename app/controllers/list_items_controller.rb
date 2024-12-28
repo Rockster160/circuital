@@ -1,4 +1,6 @@
 class ListItemsController < ApplicationController
+  skip_before_action :verify_authenticity_token
+
   def create
     @list_item = list.list_items.create!(list_item_params)
 
@@ -29,8 +31,14 @@ class ListItemsController < ApplicationController
     ListChannel.broadcast_to(@list, {
       list: @list.as_json,
       items: @list.list_items,
-      html: render_to_string(partial: "list_items/index"),
+      item_html: render_to_string(partial: "list_items/index", formats: :html, layout: false),
     })
+
+    respond_to do |format|
+      format.json { render json: {
+        data: @list_items,
+      } }
+    end
   end
 
   def list
@@ -38,8 +46,9 @@ class ListItemsController < ApplicationController
   end
 
   def list_item_params
-    params.require(:list_item).permit(
+    params.permit(
       :name,
+      :completed,
     )
   end
 end
