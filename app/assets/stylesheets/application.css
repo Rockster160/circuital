@@ -9,7 +9,7 @@ html, body {
   padding: 0;
   height: 100%;
   width: 100%;
-  color: #EEE;
+  color: var(--text-color);
 
   &, * {
     box-sizing: border-box;

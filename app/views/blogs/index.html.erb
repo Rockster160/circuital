@@ -1,5 +1,5 @@
 <div class="container">
-  <%= link_to "Create New Blog", new_blog_path, class: :button %>
+  <%= link_to "Create New Blog", new_blog_path, class: :btn %>
 
   <% @blogs.each do |blog| %>
     <%= link_to blog_path(blog), class: "item-card" do %>

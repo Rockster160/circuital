@@ -1,5 +1,5 @@
 <div class="container">
-  <%= link_to "Create New List", new_list_path, class: :button %>
+  <%= link_to "Create New List", new_list_path, class: :btn %>
 
   <% @lists.each do |list| %>
     <%= link_to list_path(list), class: "item-card" do %>

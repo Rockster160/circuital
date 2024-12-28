@@ -1,6 +1,9 @@
-<% template ||= false %>
-<% list_item ||= nil %>
+<% list_item ||= ListItem.new %>
 
-<%= link_to template ? "" : list_list_item_path(@list, list_item), class: "item-card #{"pending" if template || list_item.id == 18}" do %>
-  <div class="item-title"><%= template ? "" : list_item.name %></div>
+<% class_list = [] %>
+<% class_list << :pending if list_item.id.blank? %>
+<% class_list << :completed if list_item.completed? %>
+
+<%= link_to list_item.id && list_list_item_path(@list, list_item), class: "item-card #{class_list.join(" ")}" do %>
+  <div class="item-title"><%= list_item.name %></div>
 <% end %>

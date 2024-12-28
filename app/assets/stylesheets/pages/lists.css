@@ -7,16 +7,26 @@ html:has(body[data-controller=lists]) {
         font-size: 1em;
         margin-bottom: 0;
       }
-    }
 
-    .item-card.pending {
-      background-color: #2E2E2E;
-      border-color: #333;
-      padding: 5px 10px;
+      &.completed {
+        background-color: #2E2E2E;
+        border-color: #333;
 
-      .item-title {
-        color: #777;
-        font-size: 0.8em;
+        .item-title {
+          color: #777;
+          text-decoration: line-through;
+          font-style: italic;
+        }
+      }
+
+      &.pending {
+        background-color: #2E2E2E;
+        border-color: #333;
+
+        .item-title {
+          color: #777;
+          font-size: 0.8em;
+        }
       }
     }
   }

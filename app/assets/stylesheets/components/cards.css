@@ -14,10 +14,10 @@
 .item-title {
   font-size: 1.5em;
   margin-bottom: 10px;
-  color: #EEE;
+  color: var(--text-color);
 }
 
 .item-content {
   font-size: 1em;
-  color: #EEE;
+  color: var(--text-color);
 }

@@ -6,11 +6,11 @@ const itemsWrapper = document.querySelector("#list-items")
 
 consumer.subscriptions.create({ channel: "ListChannel", list_id: id }, {
   // connected() {
-  //   console.log("Connected!");
+  //   TODO: Hide the red dot
   // },
 
   // disconnected() {
-  //   console.log("Disconnected!");
+  //   TODO: Show a little red dot somewhere
   // },
 
   received(data) {
