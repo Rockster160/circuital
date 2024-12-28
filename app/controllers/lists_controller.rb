@@ -32,6 +32,26 @@ class ListsController < ApplicationController
     end
   end
 
+  def order_items
+    @list = List.find(params[:list_id])
+
+    params[:item_ids].reverse.each_with_index do |id, index|
+      @list.list_items.find(id).update(position: index)
+    end
+    @list_items = @list.list_items.ordered
+
+    ListChannel.broadcast_to(@list, {
+      list: @list.as_json,
+      items: @list_items,
+      item_html: render_to_string(partial: "list_items/index", formats: :html, layout: false),
+    })
+
+    render json: {
+      list: @list.as_json,
+      data: @list_items,
+    }
+  end
+
   def update
     @list = List.find(params[:id])
 

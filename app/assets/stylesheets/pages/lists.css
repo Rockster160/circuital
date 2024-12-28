@@ -31,20 +31,8 @@ html:has(body[data-controller=lists]) {
       }
 
       &.dragging {
-        background-color: #0160FF;
-        border-color: #333;
-
-        .item-title {
-          color: #777;
-          text-decoration: line-through;
-          font-style: italic;
-        }
-
-        .item-actions {
-          .delete-item {
-            background-color: #393939;
-          }
-        }
+        opacity: 0.2;
+        background-color: #3E3E3E;
       }
 
       &.completed {
@@ -101,6 +89,13 @@ html:has(body[data-controller=lists]) {
           display: none;
         }
       }
+    }
+
+    .placeholder {
+      background-color: #0160FF;
+      display: block;
+      height: 15px;
+      border-radius: 8px;
     }
   }
 }

@@ -30,7 +30,7 @@ class ListItemsController < ApplicationController
 
     ListChannel.broadcast_to(@list, {
       list: @list.as_json,
-      items: @list.list_items,
+      items: @list_items,
       item_html: render_to_string(partial: "list_items/index", formats: :html, layout: false),
     })
 
