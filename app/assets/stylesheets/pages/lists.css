@@ -1,6 +1,6 @@
 html:has(body[data-controller=lists]) {
   #list-items {
-    .item-card {
+    .list-item {
       padding: 10px;
 
       .item-title {
@@ -97,5 +97,23 @@ html:has(body[data-controller=lists]) {
       height: 15px;
       border-radius: 8px;
     }
+  }
+}
+
+.list-item.drag-image {
+  opacity: 0.2;
+  background-color: #3E3E3E;
+  padding: 10px;
+  min-width: 300px;
+
+  .item-title {
+    margin-bottom: 0;
+    font-size: 1em;
+
+    input { margin: 0; }
+  }
+
+  .item-actions {
+    display: none;
   }
 }

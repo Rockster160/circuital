@@ -75,6 +75,7 @@ function editItem(item) {
   input.value = value
 
   function save() {
+    // TODO: Only submit if the value changes
     input.setAttribute("disabled", "disabled")
     fetchJson(item.href, { method: "PATCH", body: { name: input.value } }).then(() => {
       item.innerText = input.value
