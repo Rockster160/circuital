@@ -17,7 +17,7 @@ form.addEventListener("submit", (event) => {
   if (name === "") { return }
 
   const newItem = document.querySelector("template#list-item-template").content.cloneNode(true)
-  newItem.classList.add("pending")
+  newItem.querySelector(".list-item").classList.add("pending")
   newItem.querySelector(".item-title").textContent = name
   itemsWrapper.prepend(newItem)
 
