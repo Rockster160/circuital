@@ -8,12 +8,12 @@ let placeholder = null;
 function orderedItemIds() {
   return Array.from(itemsWrapper.querySelectorAll(".list-item:not(.placeholder")).map(item => item.dataset.itemId)
 }
-let currentOrder = orderedItemIds()
+let currentOrder = null
 
 function updateOrder() {
   const newOrder = orderedItemIds()
-  if (newOrder.join(",") === currentOrder.join(",")) { return }
-
+  if (currentOrder && newOrder.join(",") === currentOrder.join(",")) { return }
+  currentOrder = null
   itemsWrapper.querySelectorAll(".list-item").forEach((item) => item.classList.add("pending"))
 
   fetchJson(`/lists/${listId}/items`, {
@@ -60,6 +60,7 @@ const createDragImage = (element) => {
 }
 
 itemsWrapper.addEventListener("dragstart", (event) => {
+  currentOrder = orderedItemIds()
   const item = event.target.closest(".list-item")
   if (!item) { return }
 
