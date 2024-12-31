@@ -58,7 +58,6 @@ html:has(body[data-controller=lists]) {
 
         .item-title {
           color: #777;
-          font-size: 0.8em;
         }
 
         .item-actions {

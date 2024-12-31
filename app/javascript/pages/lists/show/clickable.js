@@ -16,9 +16,10 @@ form.addEventListener("submit", (event) => {
 
   if (name === "") { return }
 
-  const template = document.querySelector("template#list-item-template").content.cloneNode(true)
-  template.querySelector(".item-title").textContent = name
-  itemsWrapper.prepend(template)
+  const newItem = document.querySelector("template#list-item-template").content.cloneNode(true)
+  newItem.classList.add("pending")
+  newItem.querySelector(".item-title").textContent = name
+  itemsWrapper.prepend(newItem)
 
   fetchJson(form.action, { method: "POST", body: { name } }).catch((error) => {
     console.error("[ERROR] Failed to create:", error);
@@ -29,7 +30,10 @@ form.addEventListener("submit", (event) => {
 document.addEventListener("mousedown", (event) => {
   const target = event.target
   const item = target.closest(".list-item")
-  if (!item) { return }
+  if (!item) { return } // Not an item, don't trigger mouse events
+
+  const input = target.closest("input")
+  if (input) { return } // Clicking on an input, don't mark completed or drag or delete
 
   const deleteItem = target.closest(".delete-item")
   if (deleteItem) {
@@ -75,7 +79,8 @@ function editItem(item) {
   input.value = value
 
   function save() {
-    // TODO: Only submit if the value changes
+    if (input.value === input.dataset.originalValue) { return }
+
     input.setAttribute("disabled", "disabled")
     fetchJson(item.href, { method: "PATCH", body: { name: input.value } }).then(() => {
       item.innerText = input.value

@@ -26,11 +26,13 @@
     <% flash.each do |key, message| %>
       <div class="<%= key %>"><%= message %></div>
     <% end %>
+
     <%= yield %>
 
     <% if File.file?("app/javascript/pages/#{controller_name}/#{action_name}.js") %>
       <%= javascript_include_tag "pages/#{controller_name}/#{action_name}", defer: true, type: :module %>
     <% end %>
+
     <%= yield :after_body_js %>
   </body>
 </html>

@@ -14,7 +14,7 @@ function updateOrder() {
   const newOrder = orderedItemIds()
   if (newOrder.join(",") === currentOrder.join(",")) { return }
 
-  // TODO: Only submit if the order changes
+  itemsWrapper.querySelectorAll(".list-item").forEach((item) => item.classList.add("pending"))
 
   fetchJson(`/lists/${listId}/items`, {
     method: "PUT",
@@ -31,17 +31,30 @@ const createPlaceholder = () => {
   return placeholder
 }
 
+const dropItem = (evt) => {
+  const dropped = draggingElement && placeholder
+  if (dropped) {
+    itemsWrapper.insertBefore(draggingElement, placeholder)
+  } else {
+  }
+
+  draggingElement?.classList?.remove("dragging")
+  placeholder?.remove()
+  placeholder = null
+  draggingElement = null
+
+  if (dropped) { updateOrder() }
+}
+
 const createDragImage = (element) => {
   const dragImage = element.cloneNode(true);
   dragImage.classList.add("drag-image");
   dragImage.style.position = "absolute";
-  dragImage.style.top = "-9999px"; // Move it offscreen
+  dragImage.style.top = "-9999px";
   dragImage.style.left = "-9999px";
 
-  // Add to the DOM temporarily
   document.body.appendChild(dragImage);
 
-  // Remove it after a short delay (to ensure it's not visible on the page)
   setTimeout(() => document.body.removeChild(dragImage), 0);
   return dragImage
 }
@@ -73,23 +86,5 @@ itemsWrapper.addEventListener("dragover", (event) => {
   itemsWrapper.insertBefore(placeholder, next ? item.nextElementSibling : item)
 })
 
-itemsWrapper.addEventListener("drop", (event) => {
-  event.preventDefault()
-  event.stopPropagation()
-  if (draggingElement && placeholder) {
-    itemsWrapper.insertBefore(draggingElement, placeholder)
-  }
-  draggingElement.setAttribute("draggable", "false")
-  draggingElement?.classList?.remove("dragging")
-  placeholder?.remove()
-  placeholder = null
-  updateOrder()
-})
-
-itemsWrapper.addEventListener("dragend", () => {
-  draggingElement?.classList?.remove("dragging")
-  draggingElement.setAttribute("draggable", "false")
-  placeholder?.remove()
-  placeholder = null
-  draggingElement = null
-})
+itemsWrapper.addEventListener("drop", dropItem)
+itemsWrapper.addEventListener("dragend", dropItem)
