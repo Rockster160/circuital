@@ -28,11 +28,7 @@ class ListItemsController < ApplicationController
   def serialize
     @list_items = @list.list_items.ordered
 
-    ListChannel.broadcast_to(@list, {
-      list: @list.as_json,
-      items: @list_items,
-      item_html: render_to_string(partial: "list_items/index", formats: :html, layout: false),
-    })
+    ListChannel.broadcast(@list)
 
     render json: {
       list: @list.as_json,

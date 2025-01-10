@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   resources :blogs
 
   resources :lists do
+    post :items, to: "lists#add_item"
+    delete :items, to: "lists#remove_item"
     put :items, to: "lists#order_items"
     resources :list_items, only: [:create, :update, :destroy]
   end
