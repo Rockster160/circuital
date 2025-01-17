@@ -32,8 +32,8 @@ export default class Player {
     Player.#instance = this
   }
 
-  static tick(ctx) {
-    const player = Player.instance
+  static tick(canvas, ctx) {
+    const player = Player.#instance || (new Player(canvas))
 
     if (Keyboard.isPressed("→")) { player.facingAngle = (player.facingAngle + 0.1) % (Math.PI*2) }
     if (Keyboard.isPressed("←")) { player.facingAngle = (player.facingAngle - 0.1) % (Math.PI*2) }

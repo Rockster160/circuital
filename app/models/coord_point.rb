@@ -1,0 +1,2 @@
+class CoordPoint < ApplicationRecord
+end

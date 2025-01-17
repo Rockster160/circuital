@@ -7,6 +7,9 @@ Rails.application.routes.draw do
 
   resources :blogs
 
+  get :map, to: "maps#show"
+  resources :points
+
   resources :lists do
     post :items, to: "lists#add_item"
     delete :items, to: "lists#remove_item"
