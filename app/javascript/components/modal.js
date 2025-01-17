@@ -1,9 +1,16 @@
 import Keyboard from "components/keyboard"
 
 export default class Modal {
+  static hideCallbacks = []
+  static showCallbacks = []
+
   static show(id) {
     this.hide({ except: id })
-    document.querySelector(id)?.classList?.add("show")
+    let modal = document.querySelector(id)
+    if (!modal) { return }
+
+    !modal.classList.contains("show") && this.showCallbacks.forEach(callback => callback(modal))
+    modal.classList?.add("show")
   }
 
   static toggle(id) {
@@ -17,8 +24,19 @@ export default class Modal {
 
   static hide(data) {
     document.querySelectorAll(".modal-wrapper").forEach(modal => {
-      modal.id !== data?.except && modal.classList.remove("show")
+      if (modal.id !== data?.except) {
+        modal.classList.contains("show") && this.hideCallbacks.forEach(callback => callback(modal))
+        modal.classList.remove("show")
+      }
     })
+  }
+
+  static onHide(callback) {
+    this.hideCallbacks.push(callback)
+  }
+
+  static onShow(callback) {
+    this.showCallbacks.push(callback)
   }
 
   static shown() {
