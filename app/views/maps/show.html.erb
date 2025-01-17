@@ -1,3 +1,8 @@
 <div class="full-page">
   <canvas id="coord-map"></canvas>
 </div>
+<%#= modal_btn("Hi", :new_coord, class: :btn) %>
+
+<%= render_modal :new_coord do %>
+  <h1>Hello, World!</h1>
+<% end %>

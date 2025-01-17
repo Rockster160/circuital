@@ -1,0 +1,17 @@
+<% content_for :modals do %>
+  <div class="modal-wrapper" id="<%= id %>">
+    <div class="modal" tabindex="-1">
+      <div class="close"></div>
+      <div class="modal-content">
+        <%= yield %>
+      </div>
+    </div>
+  </div>
+<% end %>
+<%#
+modal_btn("Open", :colors)
+<div class="btn" data-modal="#code-example-colors">API</div>
+= render_modal :colors do
+  <p>The Colors endpoint allows you to request colors and an amount of steps between them to fade across.</p>
+end
+%>

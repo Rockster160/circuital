@@ -14,3 +14,4 @@ function elastic(textarea) {
   textarea.style.height = (textarea.scrollHeight+5) + "px";
 }
 import "channels"
+import "components/modal"

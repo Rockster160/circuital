@@ -27,6 +27,8 @@
       <div class="<%= key %>"><%= message %></div>
     <% end %>
 
+    <%= yield :modals %>
+
     <%= yield %>
 
     <% if File.file?("app/javascript/pages/#{controller_name}/#{action_name}.js") %>
