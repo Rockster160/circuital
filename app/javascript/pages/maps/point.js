@@ -16,7 +16,6 @@ export default class Point {
     Point.points = Point.points.filter((other) => other.id !== point.id)
 
     Point.points.push(point)
-    console.log("Added", point)
   }
 
   static at(x, y) {
@@ -40,8 +39,8 @@ export default class Point {
 
   static form({ id, x, y, name, color}) {
     document.querySelector("input#id").value = id || null
-    document.querySelector("input#x").value = x
-    document.querySelector("input#y").value = y
+    document.querySelector("input#x").value = Math.round(x)
+    document.querySelector("input#y").value = Math.round(y)
     document.querySelector("input#color").value = color || "#0160FF"
     document.querySelector("input#name").value = name || ""
 

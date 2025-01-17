@@ -18,6 +18,12 @@ fullCanvasTick("coord-map", {
     map.ctx.fillStyle = "white"
     map.ctx.font = "10px Arial"
     map.ctx.fillText("(0,0)", 5 + map.fx(0), 10 + map.fy(0))
+
+    const mx = Math.round(map.absX(map.mouseX))
+    const my = Math.round(map.absY(map.mouseY))
+    if (map.mouseX !== null || map.mouseY !== null) {
+      map.ctx.fillText(`(${mx},${my})`, 10 + map.mouseX, 5 + map.mouseY)
+    }
   },
 })
 
@@ -46,7 +52,7 @@ form.addEventListener("submit", (evt) => {
   const formJson = Object.fromEntries(formData.entries())
 
   fetchJson(form.action, { method: "POST", body: formJson }).then((data) => {
-    console.log("[INFO] Created:", data);
+    // console.log("Created:", data);
   }).catch((error) => {
     console.error("[ERROR] Failed to create:", error);
   })

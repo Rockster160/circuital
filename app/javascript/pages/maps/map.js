@@ -1,17 +1,58 @@
+import Point from "pages/maps/point";
 export default class Map {
+  static #instance = null
+  static get instance() { return Map.#instance }
+
   constructor(canvas, ctx) {
     this.canvas = canvas
     this.ctx = ctx
 
-    this.x = 0
-    this.y = 0
     this.zoom = 1
-    this.dragging = false
+    this.x = -100
+    this.y = -100
+
+    this.mouseX = null
+    this.mouseY = null
 
     this.init()
+    Map.#instance = this
+  }
+
+  static recenter(x, y, zoom) {
+    let map = this.instance
+    map.zoom = zoom || 1
+    map.x = (x === null ? 0 : x) - map.widthFx/2
+    map.y = (y === null ? 0 : y) - map.heightFy/2
+  }
+
+  static constrain() {
+    let map = this.instance
+    const points = Point.points
+    if (points.length === 0) { return this.recenter() }
+    if (points.length === 1) { return this.recenter(points[0].x, -points[0].y) }
+
+    let minX = null
+    let minY = null
+    let maxX = null
+    let maxY = null
+    points.forEach(point => {
+      if (minX === null || point.x < minX) { minX = point.x }
+      if (minY === null || -point.y < minY) { minY = -point.y }
+      if (maxX === null || point.x > maxX) { maxX = point.x }
+      if (maxY === null || -point.y > maxY) { maxY = -point.y }
+    })
+    minX -= 100
+    minY -= 100
+    maxX += 100
+    maxY += 100
+    let zoom = Math.max(0.1, Math.min(map.width / (maxX - minX), map.height / (maxY - minY))) || 0.1
+    if (!isFinite(map.zoom)) { map.zoom = 2 }
+
+    this.recenter((maxX + minX)/2, (maxY + minY)/2, zoom)
   }
 
   init() {
+    this.dragging = false
     this.canvas.addEventListener("wheel", (evt) => {
       let zoomIn = evt.deltaY < 0
       this.zoom = this.zoom * (zoomIn ? 1.1 : 0.9)
@@ -19,7 +60,9 @@ export default class Map {
     this.canvas.onmousedown = (evt) => { this.dragging = true }
     this.canvas.onmouseup = (evt) => { this.dragging = false }
     this.canvas.onmousemove = (evt) => {
-      // console.log(evt.clientX, evt.clientY)
+      this.mouseX = evt.clientX
+      this.mouseY = evt.clientY
+
       if (!this.dragging) { return }
 
       this.x = this.x - (evt.movementX * this.invZoom)
