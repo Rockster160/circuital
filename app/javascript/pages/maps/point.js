@@ -38,7 +38,13 @@ export default class Point {
   }
 
   static form({ id, x, y, name, color}) {
-    document.querySelector("input#id").value = id || null
+    if (id) {
+      document.querySelector("input#id").value = id
+      document.querySelector(".delete-coord").classList.remove("hidden")
+    } else {
+      document.querySelector("input#id").value = null
+      document.querySelector(".delete-coord").classList.add("hidden")
+    }
     document.querySelector("input#x").value = Math.round(x)
     document.querySelector("input#y").value = Math.round(y)
     document.querySelector("input#color").value = color || "#0160FF"
@@ -48,6 +54,7 @@ export default class Point {
   }
 
   static setPoints(points) {
+    Point.points = []
     points.forEach((point_data) => Point.add(point_data))
   }
 

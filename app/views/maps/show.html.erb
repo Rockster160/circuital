@@ -27,7 +27,9 @@
       <%= color_field_tag :color, nil, class: "form-control" %>
     </div>
 
-    <div class="actions flex-end">
+    <div class="actions justify-between">
+      <%= link_to "Delete", coord_points_path("{id}"), class: "btn danger delete-coord",  data: { turbo_prefetch: false } %>
+      <span></span>
       <%= f.submit "Save", class: :btn %>
     </div>
   <% end %>

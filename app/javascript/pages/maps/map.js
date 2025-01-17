@@ -19,10 +19,11 @@ export default class Map {
   }
 
   static recenter(x, y, zoom) {
+    console.log("recenter", x, y, zoom)
     let map = this.instance
     map.zoom = zoom || 1
-    map.x = (x === null ? 0 : x) - map.widthFx/2
-    map.y = (y === null ? 0 : y) - map.heightFy/2
+    map.x = (x === undefined ? 0 : x) - map.widthFx/2
+    map.y = (y === undefined ? 0 : y) - map.heightFy/2
   }
 
   static constrain() {

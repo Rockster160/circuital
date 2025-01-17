@@ -42,6 +42,18 @@ window.oncontextmenu = function(evt) {
   Point.new(coordX, coordY)
 }
 
+document.addEventListener("mousedown", (evt) => {
+  if (evt.button !== 0) { return }
+
+  const mapX = map.absX(evt.clientX)
+  const mapY = -map.absY(evt.clientY)
+
+  const point = Point.at(mapX, mapY)
+  if (!point) { return }
+
+  Point.edit(point)
+})
+
 const form = document.querySelector(".modal form")
 form.addEventListener("submit", (evt) => {
   evt.preventDefault();
@@ -58,14 +70,17 @@ form.addEventListener("submit", (evt) => {
   })
 })
 
-document.addEventListener("mousedown", (evt) => {
-  if (evt.button !== 0) { return }
+document.querySelector(".delete-coord").addEventListener("click", (evt) => {
+  const btn = evt.target
+  const id = document.querySelector("input#id").value
+  if (!id) { return }
+  evt.preventDefault()
 
-  const mapX = map.absX(evt.clientX)
-  const mapY = -map.absY(evt.clientY)
+  Modal.hide()
 
-  const point = Point.at(mapX, mapY)
-  if (!point) { return }
-
-  Point.edit(point)
+  fetchJson(btn.href.replace(".%7Bid%7D", `/${id}`), { method: "DELETE" }).then((data) => {
+    // console.log("Deleted:", data);
+  }).catch((error) => {
+    console.error("[ERROR] Failed to delete:", error);
+  })
 })
