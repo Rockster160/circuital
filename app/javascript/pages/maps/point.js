@@ -74,10 +74,4 @@ export default class Point {
       map.ctx.fillText(point.name, 5 + px, 20 + py)
     })
   }
-
-  path(map) {
-    const circle = new Path2D()
-
-    return circle
-  }
 }

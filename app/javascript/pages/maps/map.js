@@ -19,7 +19,6 @@ export default class Map {
   }
 
   static recenter(x, y, zoom) {
-    console.log("recenter", x, y, zoom)
     let map = this.instance
     map.zoom = zoom || 1
     map.x = (x === undefined ? 0 : x) - map.widthFx/2
@@ -32,21 +31,18 @@ export default class Map {
     if (points.length === 0) { return this.recenter() }
     if (points.length === 1) { return this.recenter(points[0].x, -points[0].y) }
 
-    let minX = null
-    let minY = null
-    let maxX = null
-    let maxY = null
+    let minX = null, minY = null, maxX = null, maxY = null
     points.forEach(point => {
-      if (minX === null || point.x < minX) { minX = point.x }
-      if (minY === null || -point.y < minY) { minY = -point.y }
-      if (maxX === null || point.x > maxX) { maxX = point.x }
-      if (maxY === null || -point.y > maxY) { maxY = -point.y }
+      minX = Math.min(point.x, minX === null ? point.x : minX)
+      minY = Math.min(-point.y, minY === null ? point.y : minY)
+      maxX = Math.max(point.x, maxX === null ? point.x : maxX)
+      maxY = Math.max(-point.y, maxY === null ? point.y : maxY)
     })
-    minX -= 100
-    minY -= 100
-    maxX += 100
-    maxY += 100
-    let zoom = Math.max(0.1, Math.min(map.width / (maxX - minX), map.height / (maxY - minY))) || 0.1
+    const zoomOffset = 0.1
+    ;[minX, minY] = [minX, minY].map(val => val - val * -zoomOffset)
+    ;[maxX, maxY] = [maxX, maxY].map(val => val + val * zoomOffset)
+
+    let zoom = Math.max(zoomOffset, Math.min(map.width / (maxX - minX), map.height / (maxY - minY))) || zoomOffset
     if (!isFinite(map.zoom)) { map.zoom = 2 }
 
     this.recenter((maxX + minX)/2, (maxY + minY)/2, zoom)
@@ -60,6 +56,7 @@ export default class Map {
     })
     this.canvas.onmousedown = (evt) => { this.dragging = true }
     this.canvas.onmouseup = (evt) => { this.dragging = false }
+    this.canvas.onmouseleave = (evt) => { this.dragging = false }
     this.canvas.onmousemove = (evt) => {
       this.mouseX = evt.clientX
       this.mouseY = evt.clientY
@@ -102,8 +99,14 @@ export default class Map {
   }
 
   drawGrid() {
+    const lines = 10
     const vp = this.viewport()
-    const div = 100
+    const xRangeSpan = vp.x2 - vp.x1
+    const approxSpacing = xRangeSpan / lines
+    const exp = Math.floor(Math.log10(approxSpacing))
+    const div = [10, 5, 1].map(base => (base * (10**exp))).find(base => base <= approxSpacing)
+    const startX = Math.floor(vp.x1/div)*div
+    const startY = Math.floor(vp.y1/div)*div
 
     const hAxis = (atX) => this.drawLine(0, this.fy(atX), this.width, this.fy(atX))
     const vAxis = (atY) => this.drawLine(this.fx(atY), 0, this.fx(atY), this.height)
@@ -115,8 +118,8 @@ export default class Map {
 
     this.ctx.strokeStyle = "grey";
     this.ctx.lineWidth = 0.1;
-    for (let x = Math.floor(vp.x1/div)*div; x < vp.x2+div; x+=div) {
-      for (let y = Math.floor(vp.y1/div)*div; y < vp.y2+div; y+=div) {
+    for (let x = startX; x < vp.x2+div; x+=div) {
+      for (let y = startY; y < vp.y2+div; y+=div) {
         if (x === 0 || y === 0) { continue }
         vAxis(x)
         hAxis(y)

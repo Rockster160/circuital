@@ -4,6 +4,7 @@ import Modal from "components/modal";
 import Point from "pages/maps/point";
 import Map from "pages/maps/map";
 import fetchJson from "components/fetchJson";
+import Keyboard from "components/keyboard"
 
 let map = null
 
@@ -26,6 +27,8 @@ fullCanvasTick("coord-map", {
     }
   },
 })
+
+Keyboard.on("Enter", () => Map.constrain())
 
 Modal.onShow((modal) => {
   map.dragging = false
