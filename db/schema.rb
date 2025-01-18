@@ -10,13 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_01_17_055638) do
+ActiveRecord::Schema[8.0].define(version: 2025_01_18_061833) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "blogs", force: :cascade do |t|
     t.text "title"
     t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "coord_lines", force: :cascade do |t|
+    t.float "x1", null: false
+    t.float "x2", null: false
+    t.float "y1", null: false
+    t.float "y2", null: false
+    t.text "color", null: false
+    t.text "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -28,6 +39,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_17_055638) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "color"
+    t.integer "shape", default: 0
   end
 
   create_table "list_items", force: :cascade do |t|

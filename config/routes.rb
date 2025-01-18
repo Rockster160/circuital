@@ -8,7 +8,8 @@ Rails.application.routes.draw do
   resources :blogs
 
   get :map, to: "maps#show"
-  resources :coord_points, controller: :points
+  resources :coord_points
+  resources :coord_lines
 
   resources :lists do
     post :items, to: "lists#add_item"

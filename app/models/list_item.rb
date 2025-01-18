@@ -1,3 +1,20 @@
+# == Schema Information
+#
+# Table name: list_items
+#
+#  id           :integer          not null, primary key
+#  list_id      :integer
+#  name         :text
+#  position     :integer
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  completed_at :datetime
+#
+# Indexes
+#
+#  index_list_items_on_list_id  (list_id)
+#
+
 class ListItem < ApplicationRecord
   belongs_to :list
 
