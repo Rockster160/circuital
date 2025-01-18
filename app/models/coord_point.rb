@@ -2,14 +2,14 @@
 #
 # Table name: coord_points
 #
-#   id         :integer
-#   x          :float
-#   y          :float
-#   name       :string
-#   created_at :datetime
-#   updated_at :datetime
-#   color      :text
-#   shape      :integer default("circle")
+#  id         :integer
+#  x          :float
+#  y          :float
+#  name       :string
+#  created_at :datetime
+#  updated_at :datetime
+#  color      :text
+#  shape      :integer default("circle")
 #
 
 class CoordPoint < ApplicationRecord

@@ -1,4 +1,4 @@
-class PointsController < ApplicationController
+class CoordPointsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
@@ -8,14 +8,6 @@ class PointsController < ApplicationController
 
     serialize
   end
-
-  # def update
-  #   @point = CoordPoint.find(params[:id])
-
-  #   @point.update!(point_params)
-
-  #   serialize
-  # end
 
   def destroy
     @point = CoordPoint.find(point_id)
