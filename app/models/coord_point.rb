@@ -36,4 +36,8 @@ class CoordPoint < ApplicationRecord
   def connect_to_id=(new_id)
     lines_from.create(line_to_id: new_id)
   end
+
+  def connect_from_id=(new_id)
+    lines_to.create(line_from_id: new_id)
+  end
 end

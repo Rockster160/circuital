@@ -5,7 +5,6 @@ import Point from "pages/maps/point";
 import Map from "pages/maps/map";
 import fetchJson from "components/fetchJson";
 import Keyboard from "components/keyboard"
-import "pages/maps/mouse_interactions"
 
 let map = null
 
@@ -21,10 +20,10 @@ fullCanvasTick("coord-map", {
     map.ctx.font = "10px Arial"
     map.ctx.fillText("(0,0)", 5 + map.fx(0), 10 + map.fy(0))
 
-    const mx = Math.round(map.absX(map.mouseX))
-    const my = Math.round(map.absY(map.mouseY))
-    if (map.mouseX !== null || map.mouseY !== null) {
-      map.ctx.fillText(`(${mx},${my})`, 10 + map.mouseX, 5 + map.mouseY)
+    const mx = Math.round(map.absX(map.hoverX))
+    const my = Math.round(map.absY(map.hoverY))
+    if (map.hoverX !== null || map.hoverY !== null) {
+      map.ctx.fillText(`(${mx},${my})`, 10 + map.hoverX, 5 + map.hoverY)
     }
   },
 })

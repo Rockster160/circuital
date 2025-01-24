@@ -1,4 +1,5 @@
 import Point from "pages/maps/point";
+import { addMapListeners } from "pages/maps/mouse_interactions"
 export default class Map {
   static #instance = null
   static get instance() { return Map.#instance }
@@ -11,8 +12,9 @@ export default class Map {
     this.x = -100
     this.y = -100
 
-    this.mouseX = null
-    this.mouseY = null
+    this.mouse = null
+    this.hoverX = null
+    this.hoverY = null
 
     this.init()
     Map.#instance = this
@@ -50,22 +52,7 @@ export default class Map {
 
   init() {
     this.dragging = false
-    this.canvas.addEventListener("wheel", (evt) => {
-      let zoomIn = evt.deltaY < 0
-      this.zoom = this.zoom * (zoomIn ? 1.1 : 0.9)
-    })
-    this.canvas.onmousedown = (evt) => this.dragging = true
-    this.canvas.onmouseup = (evt) => this.dragging = false
-    this.canvas.onmouseleave = (evt) => this.dragging = false
-    this.canvas.onmousemove = (evt) => {
-      this.mouseX = evt.clientX
-      this.mouseY = evt.clientY
-
-      if (!this.dragging) { return }
-
-      this.x = this.x - (evt.movementX * this.invZoom)
-      this.y = this.y - (evt.movementY * this.invZoom)
-    }
+    addMapListeners(this)
   }
 
   get invZoom() { return 1 / this.zoom }
@@ -125,5 +112,11 @@ export default class Map {
     this.ctx.lineWidth = 3;
     hAxis(0)
     vAxis(0)
+
+    if (this.mouse?.dragging && this.mouse.right) {
+      this.ctx.strokeStyle = "red";
+      this.ctx.lineWidth = 3;
+      this.drawLine(this.fx(this.mouse.x), this.fy(-this.mouse.y), this.hoverX, this.hoverY)
+    }
   }
 }
