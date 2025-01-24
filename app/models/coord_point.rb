@@ -10,20 +10,32 @@
 #  y          :float
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
-#  line_to_id :bigint
-#
-# Indexes
-#
-#  index_coord_points_on_line_to_id  (line_to_id)
-#
-# Foreign Keys
-#
-#  fk_rails_...  (line_to_id => coord_points.id)
 #
 
 class CoordPoint < ApplicationRecord
-  validates :x, :y, :color, :shape, presence: true
   belongs_to :line_to, optional: true, foreign_key: :coord_point_id, class_name: "CoordPoint"
 
-  enum :shape, { circle: 0, triangle: 1, square: 2, star: 3 }
+  # Lines
+  has_many :lines_from, class_name: "CoordLine", foreign_key: :line_from_id, dependent: :destroy
+  has_many :lines_to, class_name: "CoordLine", foreign_key: :line_to_id, dependent: :destroy
+  # Points
+  has_many :line_tos, through: :lines_from, source: :line_to
+  has_many :line_froms, through: :lines_to, source: :line_from
+
+  validates :x, :y, :color, :shape, presence: true
+
+  enum :shape, {
+    circle:   0,
+    triangle: 1,
+    square:   2,
+    star:     3,
+  }
+
+  def line_to_ids
+    line_tos.ids
+  end
+
+  def connect_to_id=(new_id)
+    lines_from.create(line_to_id: new_id)
+  end
 end

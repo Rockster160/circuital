@@ -21,6 +21,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_18_061833) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "coord_lines", force: :cascade do |t|
+    t.bigint "line_from_id", null: false
+    t.bigint "line_to_id", null: false
+    t.index ["line_from_id"], name: "index_coord_lines_on_line_from_id"
+    t.index ["line_to_id"], name: "index_coord_lines_on_line_to_id"
+  end
+
   create_table "coord_points", force: :cascade do |t|
     t.float "x"
     t.float "y"
@@ -29,8 +36,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_18_061833) do
     t.datetime "updated_at", null: false
     t.text "color"
     t.integer "shape", default: 0
-    t.bigint "line_to_id"
-    t.index ["line_to_id"], name: "index_coord_points_on_line_to_id"
   end
 
   create_table "list_items", force: :cascade do |t|
@@ -49,5 +54,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_18_061833) do
     t.datetime "updated_at", null: false
   end
 
-  add_foreign_key "coord_points", "coord_points", column: "line_to_id"
+  add_foreign_key "coord_lines", "coord_points", column: "line_from_id"
+  add_foreign_key "coord_lines", "coord_points", column: "line_to_id"
 end

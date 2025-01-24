@@ -1,7 +1,7 @@
 class MapChannel < ApplicationCable::Channel
   def self.broadcast
     broadcast_to("map", {
-      points: CoordPoint.all.as_json,
+      points: CoordPoint.all.as_json(methods: :line_to_ids),
     })
   end
 

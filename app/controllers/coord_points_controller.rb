@@ -36,6 +36,7 @@ class CoordPointsController < ApplicationController
       :name,
       :color,
       :shape,
+      :connect_to_id,
     )
   end
 end
