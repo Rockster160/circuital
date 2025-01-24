@@ -35,6 +35,7 @@ class CoordPointsController < ApplicationController
       :y,
       :name,
       :color,
+      :shape,
     )
   end
 end

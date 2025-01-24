@@ -2,8 +2,8 @@
   <canvas id="coord-map"></canvas>
 </div>
 
-<%#= modal_btn("Hi", :new_coord, class: :btn) %>
-<%= render_modal :new_coord do %>
+<%#= modal_btn("Hi", :new_point, class: :btn) %>
+<%= render_modal :new_point do %>
   <%= form_with(model: CoordPoint.new, local: true) do |f| %>
     <%= hidden_field_tag :id, nil %>
 
@@ -23,12 +23,17 @@
     </div>
 
     <div class="field">
+      <%= label_tag :shape %> </br>
+      <%= select_tag :shape, options_for_select(CoordPoint.shapes.keys.map { |shape| [shape.to_s.humanize, shape] }), class: "form-control" %>
+    </div>
+
+    <div class="field">
       <%= label_tag :color %> </br>
       <%= color_field_tag :color, nil, class: "form-control" %>
     </div>
 
     <div class="actions justify-between">
-      <%= link_to "Delete", coord_points_path("{id}"), class: "btn danger delete-coord",  data: { turbo_prefetch: false } %>
+      <%= link_to "Delete", coord_points_path("{id}"), class: "btn danger delete-coord", data: { turbo_prefetch: false } %>
       <span></span>
       <%= f.submit "Save", class: :btn %>
     </div>

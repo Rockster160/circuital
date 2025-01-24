@@ -30,12 +30,9 @@ fullCanvasTick("coord-map", {
 
 Keyboard.on("Enter", () => Map.constrain())
 
-Modal.onShow((modal) => {
-  map.dragging = false
-})
-Modal.onHide((modal) => {
-  map.dragging = false
-})
+Modal.onShow((modal) => map.dragging = false)
+Modal.onHide((modal) => map.dragging = false)
+
 window.oncontextmenu = function(evt) {
   evt.preventDefault()
 

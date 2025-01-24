@@ -54,9 +54,9 @@ export default class Map {
       let zoomIn = evt.deltaY < 0
       this.zoom = this.zoom * (zoomIn ? 1.1 : 0.9)
     })
-    this.canvas.onmousedown = (evt) => { this.dragging = true }
-    this.canvas.onmouseup = (evt) => { this.dragging = false }
-    this.canvas.onmouseleave = (evt) => { this.dragging = false }
+    this.canvas.onmousedown = (evt) => this.dragging = true
+    this.canvas.onmouseup = (evt) => this.dragging = false
+    this.canvas.onmouseleave = (evt) => this.dragging = false
     this.canvas.onmousemove = (evt) => {
       this.mouseX = evt.clientX
       this.mouseY = evt.clientY
@@ -111,12 +111,7 @@ export default class Map {
     const hAxis = (atX) => this.drawLine(0, this.fy(atX), this.width, this.fy(atX))
     const vAxis = (atY) => this.drawLine(this.fx(atY), 0, this.fx(atY), this.height)
 
-    this.ctx.strokeStyle = "white";
-    this.ctx.lineWidth = 3;
-    hAxis(0)
-    vAxis(0)
-
-    this.ctx.strokeStyle = "grey";
+    this.ctx.strokeStyle = "#222";
     this.ctx.lineWidth = 0.1;
     for (let x = startX; x < vp.x2+div; x+=div) {
       for (let y = startY; y < vp.y2+div; y+=div) {
@@ -125,5 +120,10 @@ export default class Map {
         hAxis(y)
       }
     }
+
+    this.ctx.strokeStyle = "white";
+    this.ctx.lineWidth = 3;
+    hAxis(0)
+    vAxis(0)
   }
 }

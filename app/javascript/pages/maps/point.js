@@ -50,7 +50,7 @@ export default class Point {
     document.querySelector("input#color").value = color || "#0160FF"
     document.querySelector("input#name").value = name || ""
 
-    if (!Modal.shown()) { Modal.show("#new_coord") }
+    if (!Modal.shown()) { Modal.show("#new_point") }
   }
 
   static setPoints(points) {

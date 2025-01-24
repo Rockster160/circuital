@@ -9,7 +9,6 @@ Rails.application.routes.draw do
 
   get :map, to: "maps#show"
   resources :coord_points
-  resources :coord_lines
 
   resources :lists do
     post :items, to: "lists#add_item"

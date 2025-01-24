@@ -1,7 +1,6 @@
 class MapChannel < ApplicationCable::Channel
   def self.broadcast
     broadcast_to("map", {
-      lines: CoordLine.all.as_json,
       points: CoordPoint.all.as_json,
     })
   end
