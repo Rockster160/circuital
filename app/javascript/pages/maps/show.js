@@ -5,6 +5,7 @@ import Point from "pages/maps/point";
 import Map from "pages/maps/map";
 import fetchJson from "components/fetchJson";
 import Keyboard from "components/keyboard"
+import "pages/maps/mouse_interactions"
 
 let map = null
 
@@ -32,27 +33,6 @@ Keyboard.on("Enter", () => Map.constrain())
 
 Modal.onShow((modal) => map.dragging = false)
 Modal.onHide((modal) => map.dragging = false)
-
-window.oncontextmenu = function(evt) {
-  evt.preventDefault()
-
-  const coordX = map.absX(evt.clientX)
-  const coordY = -map.absY(evt.clientY)
-
-  Point.new(coordX, coordY)
-}
-
-document.addEventListener("mousedown", (evt) => {
-  if (evt.button !== 0) { return }
-
-  const mapX = map.absX(evt.clientX)
-  const mapY = -map.absY(evt.clientY)
-
-  const point = Point.at(mapX, mapY)
-  if (!point) { return }
-
-  Point.edit(point)
-})
 
 const form = document.querySelector(".modal form")
 form.addEventListener("submit", (evt) => {

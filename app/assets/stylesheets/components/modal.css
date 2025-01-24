@@ -42,7 +42,7 @@
     align-items: center;
 
     &:after {
-      content: "×";
+      content: "x";
     }
     &:hover {
       background-color: #2E2E2E;

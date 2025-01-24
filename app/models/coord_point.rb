@@ -13,8 +13,6 @@
 #
 
 class CoordPoint < ApplicationRecord
-  belongs_to :line_to, optional: true, foreign_key: :coord_point_id, class_name: "CoordPoint"
-
   # Lines
   has_many :lines_from, class_name: "CoordLine", foreign_key: :line_from_id, dependent: :destroy
   has_many :lines_to, class_name: "CoordLine", foreign_key: :line_to_id, dependent: :destroy

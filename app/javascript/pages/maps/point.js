@@ -1,4 +1,5 @@
 import Modal from "components/modal";
+import Map from "pages/maps/map";
 
 export default class Point {
   static points = []
@@ -8,6 +9,7 @@ export default class Point {
     this.y = y
     this.color = color
     this.name = name
+    this.map = Map.instance
     this.width = 8
   }
 
@@ -20,12 +22,13 @@ export default class Point {
 
   static at(x, y) {
     return this.points.find((point) => {
-      if (point.x - point.width > x) { return false }
-      if (point.x + point.width < x) { return false }
-      if (point.y - point.width > y) { return false }
-      if (point.y + point.width < y) { return false }
-
-      return true
+      const { x1, x2, y1, y2 } = point.outerBounds()
+      if (x >= x1 && x <= x2 && y >= y1 && y <= y2) {
+        // Check for actual collision
+        return true
+      } else {
+        return false
+      }
     })
   }
 
@@ -58,7 +61,8 @@ export default class Point {
     points.forEach((point_data) => Point.add(point_data))
   }
 
-  static draw(map) {
+  static draw() {
+    let map = Map.instance
     this.points.forEach((point) => {
       const px = map.fx(point.x)
       const py = map.fy(-point.y)
@@ -73,5 +77,18 @@ export default class Point {
       map.ctx.fillText(`(${point.x},${point.y})`, 5 + px, 10 + py)
       map.ctx.fillText(point.name, 5 + px, 20 + py)
     })
+  }
+
+  widthFx() { return this.width * this.map.invZoom }
+  heightFy() { return this.width * this.map.invZoom }
+  outerBounds() {
+    const width = this.widthFx()
+    const height = this.heightFy()
+    return {
+      x1: this.x - width,
+      x2: this.x + width,
+      y1: this.y - height,
+      y2: this.y + height,
+    }
   }
 }
