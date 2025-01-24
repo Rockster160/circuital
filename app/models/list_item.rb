@@ -2,13 +2,13 @@
 #
 # Table name: list_items
 #
-#  id           :integer          not null, primary key
-#  list_id      :integer
+#  id           :bigint           not null, primary key
+#  completed_at :datetime
 #  name         :text
 #  position     :integer
 #  created_at   :datetime         not null
 #  updated_at   :datetime         not null
-#  completed_at :datetime
+#  list_id      :bigint
 #
 # Indexes
 #

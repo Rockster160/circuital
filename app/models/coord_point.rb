@@ -2,22 +2,27 @@
 #
 # Table name: coord_points
 #
-#  id         :integer
-#  x          :float
-#  y          :float
-#  name       :string
-#  created_at :datetime
-#  updated_at :datetime
-#  color      :text
-#  shape      :integer default("circle")
+#  id             :bigint           not null, primary key
+#  color          :text
+#  name           :text
+#  shape          :integer          default("circle")
+#  x              :float
+#  y              :float
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#  coord_point_id :bigint
+#
+# Indexes
+#
+#  index_coord_points_on_coord_point_id  (coord_point_id)
+#
+# Foreign Keys
+#
+#  fk_rails_...  (coord_point_id => coord_points.id)
 #
 
 class CoordPoint < ApplicationRecord
-  validates :x, :y, :color, presence: true
+  validates :x, :y, :color, :shape, presence: true
 
-  enum shape: {
-    circle: 0,
-    triangle: 1,
-    square: 2,
-  }
+  enum :shape, { circle: 0, triangle: 1, square: 2, star: 3 }
 end

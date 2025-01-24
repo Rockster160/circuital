@@ -2,9 +2,9 @@
 #
 # Table name: blogs
 #
-#  id         :integer          not null, primary key
-#  title      :text
+#  id         :bigint           not null, primary key
 #  content    :text
+#  title      :text
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
