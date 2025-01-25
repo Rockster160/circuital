@@ -28,7 +28,8 @@ fullCanvasTick("coord-map", {
   },
 })
 
-Keyboard.on("Enter", () => Map.constrain())
+Keyboard.on("Enter", () => !Modal.shown() && Map.constrain())
+Keyboard.on("Backspace", () => !Modal.shown() && Map.constrain())
 
 Modal.onShow((modal) => map.dragging = false)
 Modal.onHide((modal) => map.dragging = false)
@@ -57,9 +58,5 @@ document.querySelector(".delete-coord").addEventListener("click", (evt) => {
 
   Modal.hide()
 
-  fetchJson(btn.href.replace(".%7Bid%7D", `/${id}`), { method: "DELETE" }).then((data) => {
-    // console.log("Deleted:", data);
-  }).catch((error) => {
-    console.error("[ERROR] Failed to delete:", error);
-  })
+  Point.find(id).destroy()
 })

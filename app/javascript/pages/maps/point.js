@@ -1,16 +1,19 @@
 import Modal from "components/modal";
 import Map from "pages/maps/map";
+import fetchJson from "components/fetchJson";
 
 export default class Point {
   static points = []
-  constructor({ id, x, y, color, name }) {
+  constructor({ id, x, y, color, name, width, shape, line_to_ids }) {
     this.id = id
     this.x = x
     this.y = y
     this.color = color
     this.name = name
     this.map = Map.instance
-    this.width = 8
+    this.width = width || 8
+    this.shape = shape || "circle"
+    this.line_to_ids = line_to_ids || []
   }
 
   static add(point_data) {
@@ -18,6 +21,10 @@ export default class Point {
     Point.points = Point.points.filter((other) => other.id !== point.id)
 
     Point.points.push(point)
+  }
+
+  static find(id) {
+    return this.points.find((point) => point.id === Number(id))
   }
 
   static at(x, y) {
@@ -32,15 +39,19 @@ export default class Point {
     })
   }
 
-  static new(x, y) {
-    this.form({ x, y })
+  static new(args) {
+    this.form(args)
   }
 
   static edit(point) {
     this.form(point)
   }
 
-  static form({ id, x, y, name, color}) {
+  static create(point) {
+    this.form({ ...point, id: null, form: false })
+  }
+
+  static form({ id, x, y, name, color, shape, connect_from_id, form = true }) {
     if (id) {
       document.querySelector("input#id").value = id
       document.querySelector(".delete-coord").classList.remove("hidden")
@@ -52,8 +63,14 @@ export default class Point {
     document.querySelector("input#y").value = Math.round(y)
     document.querySelector("input#color").value = color || "#0160FF"
     document.querySelector("input#name").value = name || ""
+    document.querySelector("select#shape").value = shape || "circle"
+    document.querySelector("input#connect_from_id").value = connect_from_id || null
 
-    if (!Modal.shown()) { Modal.show("#new_point") }
+    if (form) {
+      if (!Modal.shown()) { Modal.show("#new_point") }
+    } else {
+      document.querySelector(".modal form").dispatchEvent(new Event("submit"))
+    }
   }
 
   static setPoints(points) {
@@ -63,7 +80,20 @@ export default class Point {
 
   static draw() {
     let map = Map.instance
+    // Draw lines first so they are underneath points
     this.points.forEach((point) => {
+      point.line_to_ids.forEach((line_to_id) => {
+        const otherPoint = Point.find(line_to_id)
+
+        map.ctx.strokeStyle = point.color;
+        map.ctx.lineWidth = 3;
+        map.drawLine(map.fx(point.x), map.fy(-point.y), map.fx(otherPoint.x), map.fy(-otherPoint.y))
+      })
+    })
+    // Draw points
+    this.points.forEach((point) => {
+      // const px = point.clientX()
+      // const py = point.clientY()
       const px = map.fx(point.x)
       const py = map.fy(-point.y)
       map.ctx.fillStyle = point.color || "#00F"
@@ -78,6 +108,35 @@ export default class Point {
       map.ctx.fillText(point.name, 5 + px, 20 + py)
     })
   }
+
+  toJson() {
+    const skipAttrs = ["map", "line_to_ids"]
+    let json = {}
+    for (const key in this) { !skipAttrs.includes(key) && (json[key] = this[key]) }
+    return json
+  }
+
+  save(json) {
+    json = json || this.toJson()
+    const form = document.querySelector(".modal form")
+    fetchJson(form.action + `/${this.id}`, { method: "PATCH", body: json }).then((data) => {
+      // console.log("Created:", data);
+    }).catch((error) => {
+      console.error("[ERROR] Failed to update:", error);
+    })
+  }
+
+  destroy() {
+    const form = document.querySelector(".modal form")
+    fetchJson(form.action + `/${this.id}`, { method: "DELETE" }).then((data) => {
+      // console.log("Created:", data);
+    }).catch((error) => {
+      console.error("[ERROR] Failed to destroy:", error);
+    })
+  }
+
+  // clientX() { return this.map.fx(this.x) }
+  // clientY() { return this.map.fy(this.y) } // negative y?
 
   widthFx() { return this.width * this.map.invZoom }
   heightFy() { return this.width * this.map.invZoom }

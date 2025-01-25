@@ -9,6 +9,14 @@ class CoordPointsController < ApplicationController
     serialize
   end
 
+  def update
+    @point = CoordPoint.find(point_id)
+
+    @point.update!(point_params)
+
+    serialize
+  end
+
   def destroy
     @point = CoordPoint.find(point_id)
 
@@ -37,6 +45,7 @@ class CoordPointsController < ApplicationController
       :color,
       :shape,
       :connect_to_id,
+      :connect_from_id,
     )
   end
 end

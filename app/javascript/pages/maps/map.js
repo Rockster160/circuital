@@ -113,8 +113,8 @@ export default class Map {
     hAxis(0)
     vAxis(0)
 
-    if (this.mouse?.dragging && this.mouse.right) {
-      this.ctx.strokeStyle = "red";
+    if (this.mouse?.dragging && this.mouse.right && this.mouse.point) {
+      this.ctx.strokeStyle = this.mouse.point.color;
       this.ctx.lineWidth = 3;
       this.drawLine(this.fx(this.mouse.x), this.fy(-this.mouse.y), this.hoverX, this.hoverY)
     }

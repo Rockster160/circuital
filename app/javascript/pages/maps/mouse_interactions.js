@@ -17,7 +17,6 @@ export function addMapListeners(newMap) {
     map.hoverY = evt.clientY
 
     if (!map.dragging) { return }
-    if (mouse?.dragging) { return } // Don't pan if holding a point
 
     map.x = map.x - (evt.movementX * map.invZoom)
     map.y = map.y - (evt.movementY * map.invZoom)
@@ -34,7 +33,7 @@ document.addEventListener("mousedown", (evt) => {
   const point = Point.at(mouse.x, mouse.y)
   mouse.point = point // Might be null
 
-  if (!point) { return map.dragging = true }
+  if (!point) { return map.dragging = mouse.left }
 
   // Set mouse coords so dragged line is centered on point
   mouse.x = point.x
@@ -47,9 +46,9 @@ document.addEventListener("mouseup", (evt) => {
   if (mouse.left) {
     if (mouse.dragging) {
       if (mouse.point) {
-        // TODO: save point coords
+        mouse.point.save()
       } else {
-        console.log("[INVALID] Mouse left dragging, but no point")
+        // Released, but did not start on a point
       }
     } else { // Regular left click
       if (mouse.point) {
@@ -59,17 +58,18 @@ document.addEventListener("mouseup", (evt) => {
   } else if (mouse.right) {
     if (mouse.dragging) {
       if (mouse.point) {
-        const nextPoint = Point.at(mouse.x, mouse.y)
+        const [x, y] = [map.absX(evt.clientX), -map.absY(evt.clientY)]
+        const nextPoint = Point.at(x, y)
         if (nextPoint) {
-          // TODO: push `connect_to_id: nextPoint.id`
+          mouse.point.save({ connect_to_id: nextPoint.id })
         } else {
-          // TODO: Open Point.new, fill in `hidden:connect_to_id` with nextPoint.id
+          Point.create({ ...mouse.point.toJson(), id: null, x, y, name: null, connect_from_id: mouse.point.id })
         }
       } else {
-        console.log("[INVALID] Mouse dragging, but no point")
+        // Released, but did not start on a point
       }
     } else { // Regular right click
-      Point.new(mouse.x, mouse.y)
+      Point.new({ x: mouse.x, y: mouse.y })
     }
   }
 
@@ -78,13 +78,11 @@ document.addEventListener("mouseup", (evt) => {
 })
 
 document.addEventListener("mousemove", (evt) => {
-  if (!mouse?.point) { return }
+  if (!mouse) { return }
+  mouse.dragging = true
 
-  mouse.dragging = true // Mouse can only be set to dragging if there is a Point
-
-  if (mouse.left) { // Drag point to new location
+  if (mouse?.left && mouse.point) { // Drag point to new location
     mouse.point.x = Math.round(map.absX(evt.clientX))
     mouse.point.y = Math.round(-map.absY(evt.clientY))
   }
-  // if (mouse.right) {}
 })

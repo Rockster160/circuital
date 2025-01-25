@@ -6,6 +6,7 @@
 <%= render_modal :new_point do %>
   <%= form_with(model: CoordPoint.new, local: true) do |f| %>
     <%= hidden_field_tag :id, nil %>
+    <%= hidden_field_tag :connect_from_id, nil %>
 
     <div class="field">
       <%= label_tag :x %> </br>
@@ -33,7 +34,7 @@
     </div>
 
     <div class="actions justify-between">
-      <%= link_to "Delete", coord_points_path("{id}"), class: "btn danger delete-coord", data: { turbo_prefetch: false } %>
+      <%= link_to "Delete", "", class: "btn danger delete-coord", data: { turbo_prefetch: false } %>
       <span></span>
       <%= f.submit "Save", class: :btn %>
     </div>
