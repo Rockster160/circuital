@@ -28,8 +28,22 @@ fullCanvasTick("coord-map", {
   },
 })
 
-Keyboard.on("Enter", () => !Modal.shown() && Map.constrain())
-Keyboard.on("Backspace", () => !Modal.shown() && Map.constrain())
+Keyboard.on("Enter", () => {
+  if (Modal.shown()) {
+    document.querySelector(".modal form").dispatchEvent(new Event("submit"))
+  } else {
+    Map.constrain()
+  }
+})
+Keyboard.on("Backspace", () => {
+  if (Modal.shown()) {
+    if (document.activeElement.tagName !== "INPUT") {
+      const id = document.querySelector("input#id").value
+      Modal.hide()
+      if (id) { Point.find(id).destroy() }
+    }
+  }
+})
 
 Modal.onShow((modal) => map.dragging = false)
 Modal.onHide((modal) => map.dragging = false)
@@ -51,12 +65,11 @@ form.addEventListener("submit", (evt) => {
 })
 
 document.querySelector(".delete-coord").addEventListener("click", (evt) => {
-  const btn = evt.target
   const id = document.querySelector("input#id").value
   if (!id) { return }
+
   evt.preventDefault()
 
   Modal.hide()
-
   Point.find(id).destroy()
 })
