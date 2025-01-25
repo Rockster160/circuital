@@ -11,6 +11,7 @@ let map = null
 fullCanvasTick("coord-map", {
   setup: (canvas, ctx) => {
     map = new Map(canvas, ctx)
+    window.map = map
   },
   tick: (canvas, ctx, time) => {
     map.drawGrid()

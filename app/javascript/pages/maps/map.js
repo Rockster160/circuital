@@ -85,6 +85,50 @@ export default class Map {
     this.ctx.stroke()
   }
 
+  dotPath(cx, cy, diameter) {
+    let path = new Path2D();
+    path.arc(cx, cy, diameter/2, 0, 2 * Math.PI)
+    return path
+  }
+
+  squarePath(cx, cy, w) {
+    let path = new Path2D();
+    path.rect(cx-w/2, cy-w/2, w, w)
+    return path
+  }
+
+  trianglePath(cx, cy, w) { // TODO: Center this better
+    let path = new Path2D();
+    cy -= w/7
+    path.moveTo(cx, cy-w/2);
+    path.lineTo(cx+w/2, cy+w/2);
+    path.lineTo(cx-w/2, cy+w/2);
+    return path
+  }
+
+  pointyPolyPath(cx, cy, ow, iw, points) {
+    let path = new Path2D();
+    let rot = (Math.PI/2) * 3
+    const step = Math.PI / points
+    const outerRadius = ow/2
+    const innerRadius = iw/2
+
+    path.moveTo(cx, cy-outerRadius)
+    for (let i=0; i<points; i++) {
+      const outerX = cx + Math.cos(rot) * outerRadius;
+      const outerY = cy + Math.sin(rot) * outerRadius;
+      path.lineTo(outerX, outerY)
+      rot += step
+
+      const innerX = cx + Math.cos(rot) * innerRadius;
+      const innerY = cy + Math.sin(rot) * innerRadius;
+      path.lineTo(innerX, innerY)
+      rot += step
+    }
+    path.lineTo(cx, cy-outerRadius);
+    return path
+  }
+
   drawGrid() {
     const lines = 10
     const vp = this.viewport()
@@ -98,7 +142,7 @@ export default class Map {
     const hAxis = (atX) => this.drawLine(0, this.fy(atX), this.width, this.fy(atX))
     const vAxis = (atY) => this.drawLine(this.fx(atY), 0, this.fx(atY), this.height)
 
-    this.ctx.strokeStyle = "#222";
+    this.ctx.strokeStyle = "#888";
     this.ctx.lineWidth = 0.1;
     for (let x = startX; x < vp.x2+div; x+=div) {
       for (let y = startY; y < vp.y2+div; y+=div) {
