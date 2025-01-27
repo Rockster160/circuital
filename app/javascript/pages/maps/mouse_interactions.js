@@ -48,7 +48,7 @@ document.addEventListener("mouseup", (evt) => {
       if (mouse.point) {
         mouse.point.save()
       } else {
-        // Released, but did not start on a point
+        // Released after dragging, but did not start on a point
       }
     } else { // Regular left click
       if (mouse.point) {
@@ -57,16 +57,16 @@ document.addEventListener("mouseup", (evt) => {
     }
   } else if (mouse.right) {
     if (mouse.dragging) {
-      if (mouse.point) {
-        const [x, y] = [map.absX(evt.clientX), -map.absY(evt.clientY)]
+      const [x, y] = [map.absX(evt.clientX), -map.absY(evt.clientY)]
+      if (mouse.point) { // Right mouse released after dragging a point
         const nextPoint = Point.at(x, y)
-        if (nextPoint) {
+        if (nextPoint) { // Released ON a point
           mouse.point.save({ connect_to_id: nextPoint.id })
-        } else {
+        } else { // Released NOT on a point
           Point.create({ ...mouse.point.toJson(), id: null, x, y, name: null, connect_from_id: mouse.point.id })
         }
-      } else {
-        // Released, but did not start on a point
+      } else { // Right mouse released after dragging without a point
+        console.log("[ERROR] Still no point - should have created a point on drag start")
       }
     } else { // Regular right click
       Point.new({ x: mouse.x, y: mouse.y })
@@ -81,8 +81,13 @@ document.addEventListener("mousemove", (evt) => {
   if (!mouse) { return }
   mouse.dragging = true
 
-  if (mouse?.left && mouse.point) { // Drag point to new location
+  if (mouse?.left && mouse.point) { // Dragging point to new location
     mouse.point.x = Math.round(map.absX(evt.clientX))
     mouse.point.y = Math.round(-map.absY(evt.clientY))
+  }
+  if (mouse?.right && !mouse.point) { // Create new default point and draw line to it
+    mouse.point = Point.create({ x: Math.round(mouse.x), y: Math.round(mouse.y) })
+    mouse.x = mouse.point.x
+    mouse.y = mouse.point.y
   }
 })

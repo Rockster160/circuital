@@ -8,8 +8,8 @@ export default class Point {
     this.id = id
     this.x = x
     this.y = y
-    this.color = color
-    this.name = name
+    this.color = color || "#0160FF"
+    this.name = name || ""
     this.map = Map.instance
     this.width = width || 12
     this.shape = shape || "circle"
@@ -21,6 +21,7 @@ export default class Point {
     Point.points = Point.points.filter((other) => other.id !== point.id)
 
     Point.points.push(point)
+    return point
   }
 
   static find(id) {
@@ -49,8 +50,10 @@ export default class Point {
     this.form(point)
   }
 
-  static create(point) {
-    this.form({ ...point, id: null, form: false })
+  static create(point_data) {
+    const point = Point.add(point_data)
+    this.form({ ...point_data, id: null, form: false })
+    return point
   }
 
   static form({ id, x, y, name, color, shape, connect_from_id, form = true }) {
@@ -76,8 +79,20 @@ export default class Point {
   }
 
   static setPoints(points) {
+    const map = Map.instance
+    const restore_point = !!(map?.mouse?.point)
+    const restore_existing_id = restore_point && map.mouse.point.id
+    const old_ids = this.points.map((point) => point.id).filter(Boolean)
+
     Point.points = []
     points.forEach((point_data) => Point.add(point_data))
+
+    if (!restore_point) { return }
+    if (restore_existing_id) {
+      map.mouse.point = Point.find(restore_existing_id)
+    } else {
+      map.mouse.point = Point.points.find((point) => !old_ids.includes(point.id))
+    }
   }
 
   static draw() {
