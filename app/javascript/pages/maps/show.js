@@ -1,4 +1,3 @@
-import "channels/map_channel";
 import fullCanvasTick from "components/fullCanvasTick";
 import Modal from "components/modal";
 import Point from "pages/maps/point";
