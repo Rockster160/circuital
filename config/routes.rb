@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   root "challenges#welcome"
 
   get "space-game" => "challenges#space_game"
+  get :maze, to: "challenges#maze"
 
   resources :blogs
 

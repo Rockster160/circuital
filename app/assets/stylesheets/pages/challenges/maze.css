@@ -1,0 +1,19 @@
+html:has(body[data-controller=challenges][data-action=maze]) {
+  #maze {
+    .row {
+      display: block;
+      font-size: 0;
+    }
+
+    .cell {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background: #0160FF;
+      margin: 2px;
+
+      &.walked { background: grey; }
+      &.walker { background: orange; }
+    }
+  }
+}
