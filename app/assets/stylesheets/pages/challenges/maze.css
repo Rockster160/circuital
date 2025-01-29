@@ -9,11 +9,46 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       display: inline-block;
       width: 20px;
       height: 20px;
-      background: #0160FF;
+      background-color: #0160FF;
       margin: 2px;
 
-      &.walked { background: grey; }
-      &.walker { background: orange; }
+      &.walked { background-color: grey; }
+      &.walker { background-color: orange; }
+      &.start { background-color: green; }
+      &.end { background-color: red; }
+
+      position: relative;
+      &:before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #0160FF;
+        content: "";
+      }
+      &:after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        font-size: 16px;
+        text-align: center;
+        line-height: 20px;
+        background-color: #0160FF;
+        content: "";
+      }
+
+      &[data-left]:before { left: -5px; }
+      &[data-right]:before { right: -5px; }
+      &[data-up]:after { top: -5px; }
+      &[data-down]:after { bottom: -5px; }
+
+      &.walked, &.walked:before, &.walked:after { background-color: grey; }
+      &.walker, &.walker:before, &.walker:after { background-color: orange; }
+      &.start, &.start:before, &.start:after { background-color: green; }
+      &.end, &.end:before, &.end:after { background-color: red; }
     }
   }
 }

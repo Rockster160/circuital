@@ -22,6 +22,17 @@ export const randf = (min, max) => {
   return (Math.random() * (max - min)) + min
 }
 
+// -- Returns true 1 out of n times
+export const rand1In = (n) => {
+  return rand(n) == 0
+}
+// -- Returns true f percent of the time
+// tally(1000, () => oddsOf(0.2)) #=> { true: 217, false: 783 }
+// tally(1000, () => oddsOf(1/4)) #=> { true: 248, false: 752 }
+export const oddsOf = (f) => {
+  return randf() < f
+}
+
 // -- Given a hash of values mapped to "weights", returns a random value according to the weights.
 // -- Works with floats or integers without concern of upper/lower boundaries
 // weightedChoice({
