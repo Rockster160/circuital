@@ -11,31 +11,17 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       height: 20px;
       background-color: #0160FF;
       margin: 2px;
-
-      &.walked { background-color: grey; }
-      &.walker { background-color: orange; }
-      &.start { background-color: green; }
-      &.end { background-color: red; }
-
       position: relative;
-      &:before {
+      font-size: 16px;
+      text-align: center;
+      line-height: 20px;
+
+      &:before, &:after {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: #0160FF;
-        content: "";
-      }
-      &:after {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        font-size: 16px;
-        text-align: center;
-        line-height: 20px;
         background-color: #0160FF;
         content: "";
       }
@@ -47,8 +33,10 @@ html:has(body[data-controller=challenges][data-action=maze]) {
 
       &.walked, &.walked:before, &.walked:after { background-color: grey; }
       &.walker, &.walker:before, &.walker:after { background-color: orange; }
-      &.start, &.start:before, &.start:after { background-color: green; }
+      &.start, &.start:before, &.start:after { background-color: lime; }
       &.end, &.end:before, &.end:after { background-color: red; }
+      &.first, &.first:before, &.first:after { background-color: green; }
+      &.last, &.last:before, &.last:after { background-color: white; }
     }
   }
 }

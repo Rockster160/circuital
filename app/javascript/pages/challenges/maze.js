@@ -1,39 +1,56 @@
 import { rand, randf, rand1In, weightedChoice, tally, minMax, oddsOf } from "components/calc";
 
-const arrow = (dir) => {
-  return {
-    up:    "↑",
-    down:  "↓",
-    left:  "←",
-    right: "→",
-  }[dir]
-}
-
-// Occasionally getting 4 ways
-// This is because, despite locking on too many neighbors, the links are single directional
-// Could solve this by adding the "open" to both cells and/or actually linking cells in data
-// cellA.left = cellB; cellB.right = cellA
 // Also still having missed cells - does this matter, or should we allow islands?
 
 const frameDelay = 20
+
+class Direction {
+  static names = ["up", "right", "down", "left"]
+  static arrows = ["↑", "→", "↓", "←"]
+  static coords = [[0, -1], [1, 0], [0, 1], [-1, 0]]
+  static directions = this.names.map((name, idx) => new Direction(name))
+
+  constructor(dir) {
+    this.idx = Direction.names.indexOf(dir)
+    this.name = Direction.names[this.idx]
+    this.arrow = Direction.arrows[this.idx]
+    this.coord = Direction.coords[this.idx]
+    ;[this.x, this.y] = this.coord
+  }
+
+  static from(name) { return this.directions[this.names.indexOf(name)] }
+
+  static rand()  { return this.directions[rand(4)] }
+  static up()    { return this.directions[0] }
+  static right() { return this.directions[1] }
+  static down()  { return this.directions[2] }
+  static left()  { return this.directions[3] }
+
+  from(x, y) {
+    if (x instanceof Walker) { return [this.x + x.x, this.y + x.y] }
+    if (x instanceof Cell) { return [this.x + x.x, this.y + x.y] }
+    if (Array.isArray(x)) { return [this.x + x[0], this.y + x[1]] }
+    return [this.x + x, this.y + y]
+  }
+  get opposite() { return this._opposite = this._opposite || Direction.directions[(this.idx + 2) % 4] }
+}
 
 export default class Walker {
   static walkedCells = new Set()
   static straightTendency = 2
 
-  constructor(map, args) {
+  constructor(map, cell) {
+    console.log("spawn", cell)
     this.map = map
-    this.x = null
-    this.y = null
+    this.x = cell.x
+    this.y = cell.y
     this.walking = true
-    this._direction = rand(4)
+    this.direction = Direction.rand()
     this.path = []
 
-    if (args) {
-      for (const [key, val] of Object.entries(args)) { this[key] = val }
-    }
+    cell.ele.classList.add("start")
+    this.addCell(cell)
 
-    this.cell().ele.classList.add("start")
     this.interval = setInterval(() => { this.walk() }, frameDelay)
   }
 
@@ -42,10 +59,10 @@ export default class Walker {
 
     const startingCells = this.availableStartingCells()
     if (startingCells.length == 0) { return console.log("no starting cells") }
+    document.querySelectorAll(".cell").forEach((ele) => ele.classList.remove("last"))
 
     const cell = startingCells[rand(startingCells.length)]
-    console.log("spawn", cell)
-    new Walker(map, { x: cell.x, y: cell.y })
+    new Walker(map, cell)
     cell.locked = true
   }
 
@@ -53,92 +70,73 @@ export default class Walker {
     return [...this.walkedCells].filter((cell) => !cell.locked)
   }
 
-  cell() { return this.map.at(this.x, this.y) }
+  addCell(cell) {
+    cell.ele.classList.add("walker", "walked")
+    this.path.push(cell)
+    Walker.walkedCells.add(cell)
+  }
 
-  get direction() {
-    return ["up", "right", "down", "left"][this._direction]
-  }
-  set direction(newDirection) {
-    this._direction = ["up", "right", "down", "left"].indexOf(newDirection)
-  }
-  reverseDir() {
-    return {
-      up:    "down",
-      down:  "up",
-      left:  "right",
-      right: "left",
-    }[this.direction]
-  }
+  cell() { return this.map.at(this.x, this.y) }
 
   directionWeights() {
     const currentDir = this.direction
-    const reverseDir = this.reverseDir()
+    const reverseDir = this.direction.opposite
     let directions = {};
-    // directions[this.direction] = Walker.straightTendency // Increase tendency to go straight
-    (["up", "right", "down", "left"]).forEach((dir) => {
+    Direction.directions.forEach((dir) => {
       // Do not allow flipping 180
       if (dir == reverseDir) { return false }
 
       // Make sure the next coord is within bounds.
-      const [x, y] = this.nextCoord(dir)
+      const [x, y] = dir.from(this)
       const cell = this.map.at(x, y)
       if (!cell) { return false }
 
+      // Do not walk into locked cells
       if (cell.locked) { return false }
+      // Try to avoid walking into already walked cells
       if (cell.walked) {
-        directions[dir] = 0.2
+        directions[dir.name] = 0.2
         return
       }
 
-      directions[dir] = dir == currentDir ? Walker.straightTendency : 1
+      directions[dir.name] = dir == currentDir ? Walker.straightTendency : 1
     })
+    if (!Object.values(directions).some((weights) => weights >= 1)) {
+      directions[null] = 0.5
+    }
     return directions
   }
 
-  nextCoord(dir) {
-    dir = dir || this.direction
-    let x = this.x, y = this.y
-    return {
-      up:    () => [x, y - 1],
-      down:  () => [x, y + 1],
-      left:  () => [x - 1, y],
-      right: () => [x + 1, y],
-    }[dir]()
-  }
-
   walk() {
-    // const prevX = this.x, prevY = this.y
     const prevCell = this.cell()
-    this.path.push(prevCell)
-    Walker.walkedCells.add(prevCell)
-    const nextDir = weightedChoice(this.directionWeights())
     prevCell.ele.classList.remove("walker")
 
-    if (!nextDir) { return this.die() }
-    // console.log([this.x, this.y], this.directionWeights(), nextDir)
+    const dirName = weightedChoice(this.directionWeights())
+    const nextDir = Direction.from(dirName)
+    if (!nextDir) { return this.die("stuck") }
 
     this.direction = nextDir
-    const nextCoord = this.nextCoord(nextDir)
-    this.x = nextCoord[0]
-    this.y = nextCoord[1]
+    const nextCoord = nextDir.from(this)
+    ;[this.x, this.y] = nextCoord
 
-    this.cell().ele.classList.add("walker")
+    // When connecting to a previous path, this walker should end to prevent 4 ways
+    if (this.cell().walked) { return this.die("intersection") }
 
-    if (this.cell().walked) { return this.die() }
-    // if (this.cell().walked && oddsOf(3/4)) { return this.die() } // 25% chance of connecting if walking into a walked cell
+    this.addCell(this.cell())
     prevCell.open(this.direction)
   }
 
-  die() {
-    console.log("died at", this.x, this.y)
-    this.cell().ele.classList.add("end")
+  die(msg) {
+    console.log(`died by ${msg} at`, this.cell())
+    this.cell().ele.classList.add("end", "last")
     clearInterval(this.interval)
     Walker.spawn(this.map)
   }
 }
 
 class Cell {
-  constructor(x, y) {
+  constructor(map, x, y) {
+    this.map = map
     this.x = x
     this.y = y
     this.walked = false
@@ -152,18 +150,29 @@ class Cell {
     // directions - array of up/left/down/right where the cell opens up
   }
 
-  directions() {
-    return ["up", "right", "down", "left"].filter((dir) => this[dir])
+  neighbor(dir) { return this.map.at(...dir.from(this)) }
+  neighbors() {
+    return Direction.directions.map((dir) => this.neighbor(dir))
+  }
+  connections() {
+   return Direction.directions.map((dir) => this[dir.name]).filter(Boolean)
   }
 
-  open(dir) {
-    this.walked = true
-    this.ele.classList.add("walked")
-    this.ele.dataset.direction = arrow(dir)
-    this[dir] = true
-    this.ele.dataset[dir] = true
-    if (this.directions().length == 2 && !this.locked) { this.locked = rand1In(4) }
-    if (this.directions().length >= 3) { this.locked = true }
+  set content(content) { this.ele.innerHTML = content }
+
+  open(dir, walked = true) {
+    const neighbor = this.neighbor(dir)
+    this[dir.name] = neighbor
+
+    if (walked) {
+      this.walked = true
+      this.ele.dataset.arrow = dir.arrow
+      neighbor.open(dir.opposite, false)
+    }
+
+    this.ele.dataset[dir.name] = true
+    if (this.connections().length == 2 && !this.locked) { this.locked = rand1In(4) }
+    if (this.connections().length >= 3) { this.locked = true }
   }
 }
 
@@ -173,7 +182,7 @@ class Maze {
     this.height = height
     this.board = [] // Array of arrays of cells, corresponding with layout
     this.cells = Array.from({ length: width * height }, (_, idx) => {
-      const cell = new Cell(idx % width, Math.floor(idx / width))
+      const cell = new Cell(this, idx % width, Math.floor(idx / width))
       this.board[cell.y] = this.board[cell.y] || []
       this.board[cell.y][cell.x] = cell
       return cell
@@ -182,8 +191,14 @@ class Maze {
     this.generate()
   }
 
+  randCell() { return this.cells[rand(this.cells.length)] }
+
   unlockedCells() {
     return this.cells.filter((cell) => !cell.locked)
+  }
+
+  missedCells() {
+    return this.cells.filter((cell) => !cell.walked)
   }
 
   at(x, y) { return this.board[y]?.[x] }
@@ -204,8 +219,12 @@ class Maze {
       boardEle.appendChild(rowEle)
     })
   }
+
+  spawnWalker() {
+    return this.walker = new Walker(this, this.randCell())
+  }
 }
 
-const maze = new Maze(45, 25)
-
-new Walker(maze, { x: rand(maze.width), y: rand(maze.height) })
+window.maze = new Maze(45, 25)
+window.maze.spawnWalker()
+maze.walker.cell().ele.classList.add("first")
