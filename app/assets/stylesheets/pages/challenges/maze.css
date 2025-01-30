@@ -36,14 +36,15 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       &[data-up]:after { top: -5px; }
       &[data-down]:after { bottom: -5px; }
 
-      &, &:before, &:after                            { background-color: #0160FF; }
-      &.locked, &.locked:before, &.locked:after       { background-color: blue; }
-      &.walked, &.walked:before, &.walked:after       { background-color: grey; }
-      &.walker, &.walker:before, &.walker:after       { background-color: orange; }
-      &.start, &.start:before, &.start:after          { background-color: green; }
-      &.end, &.end:before, &.end:after                { background-color: red; }
-      &.first, &.first:before, &.first:after          { background-color: lime; }
-      &.last, &.last:before, &.last:after             { background-color: white; }
+      &,          &:before,          &:after          { background-color: grey; }
+      &.walked,   &.walked:before,   &.walked:after   { background-color: #0160FF; }
+      &.locked,   &.locked:before,   &.locked:after   { background-color: blue; }
+      &.walking,  &.walking:before,  &.walking:after  { background-color: darkgrey; }
+      &.walker,   &.walker:before,   &.walker:after   { background-color: orange; }
+      &.start,    &.start:before,    &.start:after    { background-color: lime; }
+      &.end,      &.end:before,      &.end:after      { background-color: chocolate; }
+      &.first,    &.first:before,    &.first:after    { background-color: green; }
+      &.last,     &.last:before,     &.last:after     { background-color: purple; }
       &.farthest, &.farthest:before, &.farthest:after { background-color: brown; }
 
       .cell-content {
@@ -54,6 +55,9 @@ html:has(body[data-controller=challenges][data-action=maze]) {
         bottom: 0;
         z-index: 1;
         font-size: 10px;
+      }
+      &.hide-content .cell-content {
+        display: none;
       }
     }
   }

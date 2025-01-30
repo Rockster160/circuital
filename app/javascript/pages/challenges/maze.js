@@ -1,6 +1,6 @@
 import { rand, randf, rand1In, weightedChoice, tally, minMax, oddsOf, sample } from "components/calc";
 
-const frameDelay = 20
+const frameDelay = 0
 let farthestCell = null
 
 class Direction {
@@ -64,12 +64,12 @@ export class Walker {
   }
 
   static spawn(map) {
-    Cell.removeClass("walker", "walked", "start", "end")
+    Cell.removeClass("walker", "walking", "start", "end")
 
     let availableCells = this.availableStartingCells()
     if (availableCells.length == 0) {
       map.connectIslands()
-      console.log("Completed walking")
+      // console.log("Completed walking")
       return
     }
     Cell.removeClass("last")
@@ -94,7 +94,7 @@ export class Walker {
     cell.walked = true
 
     Walker.walkedCells.add(cell)
-    cell.addClass("walker", "walked")
+    cell.addClass("walker", "walked", "walking")
     cell.content = cell.distance
   }
 
@@ -251,6 +251,12 @@ class Maze {
     this.generate()
   }
 
+  clean() {
+    // leave "walked"
+    Cell.removeClass("walker", "walking", "start", "end", "first", "last", "farthest", "locked")
+    Cell.addClass("hide-content")
+  }
+
   farthestCell() { return farthestCell }
   randCell() { return this.cells[rand(this.cells.length)] }
 
@@ -280,6 +286,9 @@ class Maze {
       const neighbor = sample(isoCells)
       const isoDir = Direction.between(cell, neighbor)
       cell.open(isoDir)
+      neighbor.walked = true
+      cell.addClass("walked")
+      neighbor.addClass("walked")
     })
   }
 
@@ -307,6 +316,7 @@ class Maze {
   }
 }
 
+// window.maze = new Maze(100, 50)
 window.maze = new Maze(45, 25)
 // window.maze = new Maze(10, 10)
 window.maze.spawnWalker()
