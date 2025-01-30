@@ -1,8 +1,14 @@
 html:has(body[data-controller=challenges][data-action=maze]) {
+  display: block;
+
   #maze {
+    margin: 0 auto;
+    padding: 50px;
+
     .row {
       display: block;
       font-size: 0;
+      white-space: nowrap;
     }
 
     .cell {

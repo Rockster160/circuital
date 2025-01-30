@@ -1,9 +1,5 @@
 import { rand, randf, rand1In, weightedChoice, tally, minMax, oddsOf, sample } from "components/calc";
 
-// TODO: Remove "Hello"
-// TODO: Make the maze wrapper non-wrapping so the maze scrolls instead of breaks
-// Also still having missed cells - does this matter, or should we allow islands?
-
 const frameDelay = 20
 let farthestCell = null
 
@@ -22,6 +18,15 @@ class Direction {
   }
 
   static from(name) { return this.directions[this.names.indexOf(name)] }
+  static between(cell1, cell2) {
+    if (cell1.x == cell2.x) {
+      if (cell1.y > cell2.y) { return this.up() }
+      if (cell1.y < cell2.y) { return this.down() }
+    } if (cell1.y == cell2.y) {
+      if (cell1.x > cell2.x) { return this.left() }
+      if (cell1.x < cell2.x) { return this.right() }
+    }
+  }
 
   static rand()  { return this.directions[rand(4)] }
   static up()    { return this.directions[0] }
@@ -61,15 +66,16 @@ export class Walker {
   static spawn(map) {
     Cell.removeClass("walker", "walked", "start", "end")
 
-    const startingCells = this.availableStartingCells()
-    if (startingCells.length == 0) {
+    let availableCells = this.availableStartingCells()
+    if (availableCells.length == 0) {
+      map.connectIslands()
       console.log("Completed walking")
       return
     }
     Cell.removeClass("last")
 
-    const cell = startingCells[rand(startingCells.length)]
-    new Walker(map, cell)
+    const cell = availableCells[rand(availableCells.length)]
+    map.spawnWalker(cell)
     cell.locked = true
   }
 
@@ -181,10 +187,10 @@ class Cell {
 
   neighbor(dir) { return this[dir.name] || this.map.at(...dir.from(this)) }
   neighbors() {
-    return this._neighbors || (this._neighbors = Direction.directions.map((dir) => this.neighbor(dir)))
+    return this._neighbors || (this._neighbors = Direction.directions.map((dir) => this.neighbor(dir)).filter(Boolean))
   }
   walkedNeighbors() {
-    return Direction.directions.map((dir) => this.neighbor(dir)).filter((cell) => cell?.walked)
+    return this.neighbors().filter((cell) => cell?.walked)
   }
   connections() {
     return Direction.directions.map((dir) => this[dir.name]).filter(Boolean)
@@ -256,6 +262,27 @@ class Maze {
     return this.cells.filter((cell) => !cell.walked)
   }
 
+  connectIslands() {
+    this.missedCells().forEach((cell) => {
+      // console.log("island", cell)
+      let isoCells = []
+      let isoConnCount = null
+
+      cell.neighbors().forEach((neighbor) => {
+        const connCount = neighbor.connections().length
+        if (!isoConnCount || connCount < isoConnCount) {
+          isoCells = [neighbor]
+          isoConnCount = connCount
+        } else if (connCount == isoConnCount) {
+          isoCells.push(neighbor)
+        }
+      })
+      const neighbor = sample(isoCells)
+      const isoDir = Direction.between(cell, neighbor)
+      cell.open(isoDir)
+    })
+  }
+
   at(x, y) { return this.board[y]?.[x] }
 
   generate() {
@@ -275,12 +302,13 @@ class Maze {
     })
   }
 
-  spawnWalker() {
-    return this.walker = new Walker(this, this.randCell())
+  spawnWalker(cell) {
+    return this.walker = new Walker(this, cell || this.randCell())
   }
 }
 
 window.maze = new Maze(45, 25)
+// window.maze = new Maze(10, 10)
 window.maze.spawnWalker()
 maze.walker.cell().addClass("first")
 
