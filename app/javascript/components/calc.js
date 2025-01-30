@@ -81,3 +81,7 @@ export const minMax = (times, fn) => {
   }
   return { min, max }
 }
+
+export const sample = (arr) => {
+  return arr[rand(arr.length)]
+}

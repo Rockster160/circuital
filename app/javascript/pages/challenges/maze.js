@@ -1,4 +1,4 @@
-import { rand, randf, rand1In, weightedChoice, tally, minMax, oddsOf } from "components/calc";
+import { rand, randf, rand1In, weightedChoice, tally, minMax, oddsOf, sample } from "components/calc";
 
 // Also still having missed cells - does this matter, or should we allow islands?
 
@@ -35,18 +35,19 @@ class Direction {
   get opposite() { return this._opposite = this._opposite || Direction.directions[(this.idx + 2) % 4] }
 }
 
-export default class Walker {
+export class Walker {
   static walkedCells = new Set()
   static straightTendency = 2
 
   constructor(map, cell) {
-    console.log("spawn", cell)
+    // console.log("spawn", cell)
     this.map = map
     this.x = cell.x
     this.y = cell.y
     this.walking = true
     this.direction = Direction.rand()
     this.path = []
+    this.startDistance = null
 
     cell.ele.classList.add("start")
     this.addCell(cell)
@@ -71,9 +72,13 @@ export default class Walker {
   }
 
   addCell(cell) {
-    cell.ele.classList.add("walker", "walked")
+    this.startDistance = this.startDistance || cell.distance || 0
+    cell.distance = Math.min(cell.distance || Infinity, this.path.length + this.startDistance)
     this.path.push(cell)
+
     Walker.walkedCells.add(cell)
+    cell.ele.classList.add("walker", "walked")
+    cell.content = cell.distance
   }
 
   cell() { return this.map.at(this.x, this.y) }
@@ -84,20 +89,17 @@ export default class Walker {
     let directions = {};
     Direction.directions.forEach((dir) => {
       // Do not allow flipping 180
-      if (dir == reverseDir) { return false }
+      if (dir == reverseDir) { return }
 
       // Make sure the next coord is within bounds.
       const [x, y] = dir.from(this)
       const cell = this.map.at(x, y)
-      if (!cell) { return false }
+      if (!cell) { return }
 
       // Do not walk into locked cells
-      if (cell.locked) { return false }
+      if (cell.locked) { return }
       // Try to avoid walking into already walked cells
-      if (cell.walked) {
-        directions[dir.name] = 0.2
-        return
-      }
+      if (cell.walked) { return directions[dir.name] = 0.2 }
 
       directions[dir.name] = dir == currentDir ? Walker.straightTendency : 1
     })
@@ -127,7 +129,7 @@ export default class Walker {
   }
 
   die(msg) {
-    console.log(`died by ${msg} at`, this.cell())
+    // console.log(`died by ${msg} at`, this.cell())
     this.cell().ele.classList.add("end", "last")
     clearInterval(this.interval)
     Walker.spawn(this.map)
@@ -146,8 +148,7 @@ class Cell {
     this.right = null
     this.down = null
     this.left = null
-    // distance from start
-    // directions - array of up/left/down/right where the cell opens up
+    this.distance = null
   }
 
   neighbor(dir) { return this.map.at(...dir.from(this)) }
@@ -158,7 +159,12 @@ class Cell {
    return Direction.directions.map((dir) => this[dir.name]).filter(Boolean)
   }
 
-  set content(content) { this.ele.innerHTML = content }
+  set content(content) {
+    const div = document.createElement("div")
+    div.classList.add("cell-content")
+    div.innerHTML = content
+    this.ele.innerHTML = div.outerHTML
+  }
 
   open(dir, walked = true) {
     const neighbor = this.neighbor(dir)
@@ -173,6 +179,7 @@ class Cell {
     this.ele.dataset[dir.name] = true
     if (this.connections().length == 2 && !this.locked) { this.locked = rand1In(4) }
     if (this.connections().length >= 3) { this.locked = true }
+    // if (this.locked) { this.ele.classList.add("locked") }
   }
 }
 
