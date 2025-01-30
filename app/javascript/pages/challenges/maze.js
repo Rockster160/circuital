@@ -1,8 +1,11 @@
 import { rand, randf, rand1In, weightedChoice, tally, minMax, oddsOf, sample } from "components/calc";
 
+// TODO: Remove "Hello"
+// TODO: Make the maze wrapper non-wrapping so the maze scrolls instead of breaks
 // Also still having missed cells - does this matter, or should we allow islands?
 
 const frameDelay = 20
+let farthestCell = null
 
 class Direction {
   static names = ["up", "right", "down", "left"]
@@ -49,18 +52,21 @@ export class Walker {
     this.path = []
     this.startDistance = null
 
-    cell.ele.classList.add("start")
+    cell.addClass("start")
     this.addCell(cell)
 
     this.interval = setInterval(() => { this.walk() }, frameDelay)
   }
 
   static spawn(map) {
-    document.querySelectorAll(".cell").forEach((ele) => ele.classList.remove("walker", "walked", "start", "end"))
+    Cell.removeClass("walker", "walked", "start", "end")
 
     const startingCells = this.availableStartingCells()
-    if (startingCells.length == 0) { return console.log("no starting cells") }
-    document.querySelectorAll(".cell").forEach((ele) => ele.classList.remove("last"))
+    if (startingCells.length == 0) {
+      console.log("Completed walking")
+      return
+    }
+    Cell.removeClass("last")
 
     const cell = startingCells[rand(startingCells.length)]
     new Walker(map, cell)
@@ -68,16 +74,21 @@ export class Walker {
   }
 
   static availableStartingCells() {
-    return [...this.walkedCells].filter((cell) => !cell.locked)
+    return [...this.walkedCells].filter((cell) => !cell.cascadeLock())
   }
 
   addCell(cell) {
     this.startDistance = this.startDistance || cell.distance || 0
     cell.distance = Math.min(cell.distance || Infinity, this.path.length + this.startDistance)
+    if (!farthestCell || cell.distance > farthestCell.distance) {
+      Cell.removeClass("farthest")
+      farthestCell = cell.addClass("farthest")
+    }
     this.path.push(cell)
+    cell.walked = true
 
     Walker.walkedCells.add(cell)
-    cell.ele.classList.add("walker", "walked")
+    cell.addClass("walker", "walked")
     cell.content = cell.distance
   }
 
@@ -96,7 +107,7 @@ export class Walker {
       const cell = this.map.at(x, y)
       if (!cell) { return }
 
-      // Do not walk into locked cells
+      // Do not walk into _locked cells
       if (cell.locked) { return }
       // Try to avoid walking into already walked cells
       if (cell.walked) { return directions[dir.name] = 0.2 }
@@ -111,7 +122,7 @@ export class Walker {
 
   walk() {
     const prevCell = this.cell()
-    prevCell.ele.classList.remove("walker")
+    prevCell.removeClass("walker")
 
     const dirName = weightedChoice(this.directionWeights())
     const nextDir = Direction.from(dirName)
@@ -130,7 +141,7 @@ export class Walker {
 
   die(msg) {
     // console.log(`died by ${msg} at`, this.cell())
-    this.cell().ele.classList.add("end", "last")
+    this.cell().addClass("end", "last")
     clearInterval(this.interval)
     Walker.spawn(this.map)
   }
@@ -138,25 +149,45 @@ export class Walker {
 
 class Cell {
   constructor(map, x, y) {
-    this.map = map
+    this.distance = null
     this.x = x
     this.y = y
     this.walked = false
-    this.locked = false
+    this._locked = false
 
     this.up = null
     this.right = null
     this.down = null
     this.left = null
-    this.distance = null
+
+    this._neighbors = null
+    this.map = map
   }
 
-  neighbor(dir) { return this.map.at(...dir.from(this)) }
+  static addClass(...className) {
+    document.querySelectorAll(".cell").forEach((ele) => ele.classList.add(...className))
+  }
+  static removeClass(...className) {
+    document.querySelectorAll(".cell").forEach((ele) => ele.classList.remove(...className))
+  }
+  addClass(...className) {
+    this.ele.classList.add(...className)
+    return this
+  }
+  removeClass(...className) {
+    this.ele.classList.remove(...className)
+    return this
+  }
+
+  neighbor(dir) { return this[dir.name] || this.map.at(...dir.from(this)) }
   neighbors() {
-    return Direction.directions.map((dir) => this.neighbor(dir))
+    return this._neighbors || (this._neighbors = Direction.directions.map((dir) => this.neighbor(dir)))
+  }
+  walkedNeighbors() {
+    return Direction.directions.map((dir) => this.neighbor(dir)).filter((cell) => cell?.walked)
   }
   connections() {
-   return Direction.directions.map((dir) => this[dir.name]).filter(Boolean)
+    return Direction.directions.map((dir) => this[dir.name]).filter(Boolean)
   }
 
   set content(content) {
@@ -179,7 +210,23 @@ class Cell {
     this.ele.dataset[dir.name] = true
     if (this.connections().length == 2 && !this.locked) { this.locked = rand1In(4) }
     if (this.connections().length >= 3) { this.locked = true }
-    // if (this.locked) { this.ele.classList.add("locked") }
+  }
+
+  get locked() { return this._locked }
+  set locked(bool) {
+    if (bool && !this._locked) { this.addClass("locked") }
+    if (bool && !this.walked) { this.addClass("walked").walked = true } // Have to walk to lock
+    this._locked = bool
+  }
+
+  cascadeLock() {
+    if (this.locked) { return this.locked }
+    const walkedNeighbors = this.walkedNeighbors()
+    if (walkedNeighbors.length == 4) {
+      this.locked = true
+      walkedNeighbors.forEach((cell) => cell.cascadeLock())
+    }
+    return this.locked
   }
 }
 
@@ -198,10 +245,11 @@ class Maze {
     this.generate()
   }
 
+  farthestCell() { return farthestCell }
   randCell() { return this.cells[rand(this.cells.length)] }
 
   unlockedCells() {
-    return this.cells.filter((cell) => !cell.locked)
+    return this.cells.filter((cell) => !cell.cascadeLock())
   }
 
   missedCells() {
@@ -234,4 +282,12 @@ class Maze {
 
 window.maze = new Maze(45, 25)
 window.maze.spawnWalker()
-maze.walker.cell().ele.classList.add("first")
+maze.walker.cell().addClass("first")
+
+document.addEventListener("click", (evt) => {
+  const cellEle = evt.target.closest(".cell")
+  if (cellEle) {
+    const cell = maze.at(parseInt(cellEle.dataset.x), parseInt(cellEle.dataset.y))
+    debugger
+  }
+})
