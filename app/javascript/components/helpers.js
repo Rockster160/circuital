@@ -23,3 +23,28 @@ export const pluralize = (word) => {
   }
   return word + "s"
 }
+
+export function currentTime() {
+  let now = new Date()
+  let hours = String(now.getHours()).padStart(2, "0")
+  let minutes = String(now.getMinutes()).padStart(2, "0")
+  let seconds = String(now.getSeconds()).padStart(2, "0")
+
+  return `${hours}:${minutes}:${seconds}`
+}
+
+export function duration(startTime, endTime) {
+  let [startH, startM, startS] = startTime.split(":").map(Number)
+  let [endH, endM, endS] = endTime.split(":").map(Number)
+
+  let startInSeconds = startH * 3600 + startM * 60 + startS
+  let endInSeconds = endH * 3600 + endM * 60 + endS
+
+  let diffInSeconds = Math.abs(endInSeconds - startInSeconds)
+
+  let hours = Math.floor(diffInSeconds / 3600)
+  let minutes = Math.floor((diffInSeconds % 3600) / 60)
+  let seconds = diffInSeconds % 60
+
+  return `${hours}h ${minutes}m ${seconds}s`
+}

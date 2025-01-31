@@ -26,7 +26,7 @@ export const randf = (min, max) => {
 export const rand1In = (n) => {
   return rand(n) == 0
 }
-// -- Returns true f percent of the time
+// -- Returns true f (fraction 0..1) percent of the time
 // tally(1000, () => oddsOf(0.2)) #=> { true: 217, false: 783 }
 // tally(1000, () => oddsOf(1/4)) #=> { true: 248, false: 752 }
 export const oddsOf = (f) => {
@@ -46,12 +46,12 @@ export const weightedChoice = function(itemsWithWeights) {
   let selectedIdx = randf(total)
   return Object.entries(itemsWithWeights).find((itemWithWeight) => {
     const [item, weight] = itemWithWeight
-    if (selectedIdx <= weight) {
+    if (weight > 0 && selectedIdx <= weight) {
       return item
     } else {
       selectedIdx -= weight
     }
-  })?.[0]
+  })?.[0] || null
 }
 
 // -- Runs the given function x times and returns a hash with the count that each result occurred
@@ -83,5 +83,6 @@ export const minMax = (times, fn) => {
 }
 
 export const sample = (arr) => {
+  arr = Array.isArray(arr) ? arr : Array.from(arr)
   return arr[rand(arr.length)]
 }
