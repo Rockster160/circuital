@@ -86,3 +86,27 @@ export const sample = (arr) => {
   arr = Array.isArray(arr) ? arr : Array.from(arr)
   return arr[rand(arr.length)]
 }
+export const findMin = (arr, fn) => {
+  let min = null
+  let minItem = null
+  arr.forEach(item => {
+    const val = fn(item)
+    if (val !== null && (min === null || val < min)) {
+      min = val
+      minItem = item
+    }
+  })
+  return minItem
+}
+export const findMax = (arr, fn) => {
+  let max = null
+  let maxItem = null
+  arr.forEach(item => {
+    const val = fn(item)
+    if (val !== null && (max === null || val > max)) {
+      max = val
+      maxItem = item
+    }
+  })
+  return maxItem
+}

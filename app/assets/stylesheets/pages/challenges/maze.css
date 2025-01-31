@@ -46,6 +46,7 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       &.first,    &.first:before,    &.first:after    { background-color: green; }
       &.last,     &.last:before,     &.last:after     { background-color: purple; }
       &.farthest, &.farthest:before, &.farthest:after { background-color: brown; }
+      &.recount,  &.recount:before,  &.recount:after  { color: red; font-weight: bold; }
 
       .cell-content {
         position: absolute;
