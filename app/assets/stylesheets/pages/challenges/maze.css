@@ -55,14 +55,14 @@ html:has(body[data-controller=challenges][data-action=maze]) {
         z-index: 1;
         font-size: 10px;
       }
+    }
 
-      &.clean {
-        /* Same color as walked class, but defined at the end for specificity */
-        &, &:before, &:after { background-color: #0160FF; }
+    & .cell .clean {
+      /* Same color as walked class, but defined at the end for specificity */
+      &, &:before, &:after { background-color: #0160FF; }
 
-        .cell-content {
-          display: none;
-        }
+      .cell-content {
+        display: none;
       }
     }
   }
