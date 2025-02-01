@@ -41,8 +41,6 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       &.locked,   &.locked:before,   &.locked:after   { background-color: blue; }
       &.walking,  &.walking:before,  &.walking:after  { background-color: darkgrey; }
       &.walker,   &.walker:before,   &.walker:after   { background-color: orange; }
-      &.start,    &.start:before,    &.start:after    { background-color: lime; }
-      &.end,      &.end:before,      &.end:after      { background-color: chocolate; }
       &.first,    &.first:before,    &.first:after    { background-color: green; }
       &.last,     &.last:before,     &.last:after     { background-color: purple; }
       &.farthest, &.farthest:before, &.farthest:after { background-color: brown; }

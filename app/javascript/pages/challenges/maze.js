@@ -18,12 +18,12 @@ const adjacentBias = 1/4 // (1/4)
 // 1 no bias - treat paths and open cells equally
 // 1+ is valid, but causes weirdness because the walker will TRY to connect instead of taking the open path.
 // This will cause more dead ends instead of running along each other or turning away.
-const loopProbability = 2/4 // (1/4)
+const loopProbability = 1/4 // (1/4)
 // - When a walker reaches a previous path, this is the likelihood of connecting to it.
 // 0 means no loops, prefer dead ends
 // 1 means every cell will try to reconnect to a previous path (unless locked via branchBias)
 
-
+// const token = () => Math.random().toString(36).slice(2, 6).toUpperCase()
 // I'd like to avoid a 2x2 "loop", but not sure how to. 🤔
 
 const startTime = currentTime()
@@ -81,10 +81,8 @@ export class Walker {
     this.path = []
     this.startDistance = null
 
-    cell.start = true
     this.addCell(cell)
-
-    this.interval = setInterval(() => { this.walk() }, frameDelay)
+    this.walk()
   }
 
   static spawn(map) {
@@ -103,7 +101,7 @@ export class Walker {
   addCell(cell, dir, prevCell) {
     this.startDistance = this.startDistance || cell.distance || 0
     if (dir && prevCell) {
-      prevCell.open(dir, cell, this.path.length + this.startDistance - 1) // Adds connection and recounts
+      prevCell.connect(dir, cell, this.path.length + this.startDistance - 1) // Adds connection and recounts
     }
     // Push after open so that first cell is 0 distance
     this.path.push(cell)
@@ -113,7 +111,6 @@ export class Walker {
     cell.walker = true
     cell.walking = true
     cell.last = true
-    cell.end = true
   }
 
   cell() { return this.map.at(this.x, this.y) }
@@ -166,14 +163,13 @@ export class Walker {
     } else {
       this.addCell(this.cell(), this.direction, prevCell)
     }
+
+    setTimeout(() => this.walk(), frameDelay);
   }
 
   die(msg) {
     this.path.forEach((cell) => cell.walking = false)
-    this.map.start = null
-    this.map.end = null
-    clearInterval(this.interval)
-    Walker.spawn(this.map)
+    setTimeout(() => Walker.spawn(this.map), frameDelay);
   }
 }
 
@@ -195,56 +191,53 @@ class Cell {
   }
 
   setMapSingle(val, bool) {
-    const mapValCell = this.map[val]
+    if (this["_" + val] === bool) { return }
+    const mapValCell = this.map.cellCache[val]
     if (bool) {
-      if (mapValCell == this) { return }
+      // if (mapValCell == this) { return }
       if (mapValCell) { mapValCell[val] = false }
       this.map.cellCache[val] = this
       this.addClass(val)
     } else {
-      if (mapValCell != this) { return }
+      // if (mapValCell != this) { return }
       this.map.cellCache[val] = null
       this.removeClass(val)
     }
+    this["_" + val] = bool
   }
 
   setMapSet(val, bool) {
+    if (this["_" + val] === bool) { return }
     if (bool && val !== "islands") { this.island = false }
 
-    const mapSet = this.map[val]
+    const mapSet = this.map.cellCache[val]
     if (bool) {
-      if (mapSet.has(this)) { return }
+      // if (mapSet.has(this)) { return }
       mapSet.add(this)
       this.addClass(val)
     } else {
-      if (!mapSet.has(this)) { return }
+      // if (!mapSet.has(this)) { return }
       mapSet.delete(this)
       this.removeClass(val)
     }
+    this["_" + val] = bool
   }
 
-  get start()        { return this._start }
-  get end()          { return this._end }
   get first()        { return this._first }
   get last()         { return this._last }
   get farthest()     { return this._farthest }
-  set start(bool)    { this._start = bool; this.setMapSingle("start", bool) }
-  set end(bool)      { this._end = bool; this.setMapSingle("end", bool) }
-  set first(bool)    { this._first = bool; this.setMapSingle("first", bool) }
-  set last(bool)     { this._last = bool; this.setMapSingle("last", bool) }
-  set farthest(bool) { this._farthest = bool; this.setMapSingle("farthest", bool) }
+  set first(bool)    { this.setMapSingle("first", bool) }
+  set last(bool)     { this.setMapSingle("last", bool) }
+  set farthest(bool) { this.setMapSingle("farthest", bool) }
 
   get walked() { return this._walked }
   get locked() { return this._locked }
-  set walked(bool) {
-    if (bool == this._walked) { return }
-    this._walked = bool
-    this.setMapSet("walked", bool)
-  }
+  get walking() { return this._walking }
+  get walkers() { return this._walkers }
+  get island() { return this._island }
+  set walked(bool) { this.setMapSet("walked", bool) }
   set locked(bool) {
-    if (bool == this._locked) { return }
     if (bool && !this.walked) { this.walked = true } // Have to walk to lock
-    this._locked = bool
     this.setMapSet("locked", bool)
   }
   set walking(bool) { this.setMapSet("walking", bool) }
@@ -256,6 +249,12 @@ class Cell {
     if (val == this._distance) { return }
     this._distance = val
     this.content = val
+    if (this.distance > this.map.farthestDist) {
+      this.farthest = true
+    }
+    if (this.farthest) {
+      this.map.farthestDist = this.distance
+    }
   }
 
   set content(content) {
@@ -291,7 +290,7 @@ class Cell {
     return Direction.directions.map((dir) => this[dir.name]).filter(Boolean)
   }
 
-  open(dir, neighbor, nextDist=null) {
+  connect(dir, neighbor, nextDist=null) {
     this.walked = true
     neighbor = neighbor || this.neighbor(dir)
 
@@ -303,7 +302,7 @@ class Cell {
 
     this[dir.name] = neighbor
     this.ele.dataset[dir.name] = true
-    if (neighbor[dir.opposite.name] === null) { neighbor.open(dir.opposite, this, nextDist+1) }
+    if (neighbor[dir.opposite.name] === null) { neighbor.connect(dir.opposite, this, nextDist+1) }
 
     const conns = this.connections()
     if (conns.length == 2 && !this.locked && oddsOf(branchBias)) { this.locked = true }
@@ -311,15 +310,12 @@ class Cell {
 
     if (this.distance === null) {
       this.distance = nextDist
-      if (this.distance > this.map.farthest.distance) {
-        this.map.farthest = this
-      }
     } else {
       this.recountDistance()
     }
   }
 
-  recountDistance(newVal, farthestCell=null) {
+  recountDistance(prevCell=null) {
     if (this.first) { return this.distance = 0 }
     const conns = this.connections()
     const minDistCell = findMin(conns, (cell) => cell.distance)
@@ -330,7 +326,7 @@ class Cell {
       this.distance = nextDist
     } else if (this.distance > nextDist) {
       this.distance = nextDist
-      conns.forEach((cell) => cell.recountDistance())
+      conns.forEach((cell) => prevCell != cell && cell.recountDistance(this))
     }
   }
 
@@ -349,11 +345,10 @@ class Maze {
   constructor(width, height) {
     this.width = width
     this.height = height
+    this.farthestDist = 0
     this.cellCache = {
       first:    null, // First cell in the maze
       last:     null, // Last cell to be generated
-      start:    null, // Current walker start
-      end:      null, // Current walker end
       farthest: null,
       walked:   new Set(),
       locked:   new Set(),
@@ -372,8 +367,6 @@ class Maze {
     this.generate()
   }
 
-  get start() { return this.cellCache.start }       // single cell
-  get end() { return this.cellCache.end }           // single cell
   get first() { return this.cellCache.first }       // single cell
   get last() { return this.cellCache.last }         // single cell
   get farthest() { return this.cellCache.farthest || this.findFarthestCell() } // single cell
@@ -389,18 +382,18 @@ class Maze {
     if (cell) { cell[val] = false }
   }
 
-  set start(newCell) { newCell ? (newCell.start = true) : (this.unset("start")) }
-  set end(newCell) { newCell ? (newCell.end = true) : (this.unset("end")) }
   set first(newCell) { newCell ? (newCell.first = true) : (this.unset("first")) }
   set last(newCell) { newCell ? (newCell.last = true) : (this.unset("last")) }
-  set farthest(newCell) { newCell ? (newCell.farthest = true) : (this.unset("farthest")) }
+  set farthest(newCell) { newCell ? (newCell.farthest = true) : this.unset("farthest") }
 
   randCell() { return this.cells[rand(this.cells.length)] }
 
   findFarthestCell() {
-    console.log("Finding farthest")
     const farthest = findMax(this.walked, (cell) => cell.distance)
-    if (farthest) { return this.cellCache.farthest = farthest }
+    if (farthest) {
+      this.farthestDist = farthest.distance
+      return this.cellCache.farthest = farthest
+    }
   }
 
   connectIslands(islands=null) {
@@ -412,29 +405,29 @@ class Maze {
       console.log("Duration: " + duration(startTime, endTime))
       return
     }
-    let isoCells = []
+    let connectableCells = []
     let isoConnCount = null
 
     cell.neighbors().forEach((neighbor) => {
       const connCount = neighbor.connections().length
       if (connCount == 0) { return }
       if (!isoConnCount || connCount < isoConnCount) {
-        isoCells = [neighbor]
+        connectableCells = [neighbor]
         isoConnCount = connCount
       } else if (connCount == isoConnCount) {
-        isoCells.push(neighbor)
+        connectableCells.push(neighbor)
       }
     })
 
-    if (isoCells.length == 0) { // Deserted island, retry to find one with connections
+    if (connectableCells.length == 0) { // Deserted island, retry to find one with connections
       const withoutSkipped = Array.from(islands).filter((iso) => iso != cell)
       return this.connectIslands(withoutSkipped)
     }
 
-    const neighbor = sample(isoCells)
+    const neighbor = sample(connectableCells)
     const isoDir = Direction.between(cell, neighbor)
-    cell.open(isoDir, neighbor)
-    this.spawnWalker(neighbor)
+    cell.connect(isoDir, neighbor, neighbor.distance+1)
+    this.spawnWalker(cell)
   }
 
   at(x, y) { return this.board[y]?.[x] }
@@ -486,9 +479,8 @@ document.addEventListener("click", (evt) => {
   }
 })
 
-
 let cleanCells = false
-Keyboard.on("Space", () => {
+const toggleClean = () => {
   if (cleanCells) {
     Cell.removeClass("clean")
     cleanCells = false
@@ -496,9 +488,11 @@ Keyboard.on("Space", () => {
     Cell.addClass("clean")
     cleanCells = true
   }
-})
+}
 
-Keyboard.on("Enter", () => {
+Keyboard.on("Space", () => toggleClean())
+
+Keyboard.on("?", () => {
   console.log("Checking...")
   let data = { valid: 0, walked: 0, island: 0, invalid: 0 }
   maze.cells.forEach(cell => {
