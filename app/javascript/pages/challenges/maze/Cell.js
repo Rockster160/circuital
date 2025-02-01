@@ -52,9 +52,11 @@ export default class Cell {
   get first()        { return this._first }
   get last()         { return this._last }
   get farthest()     { return this._farthest }
+  get finish()       { return this._finish }
   set first(bool)    { this.setMapSingle("first", bool) }
   set last(bool)     { this.setMapSingle("last", bool) }
   set farthest(bool) { this.setMapSingle("farthest", bool) }
+  set finish(bool)   { this.setMapSingle("finish", bool) }
 
   get walked() { return this._walked }
   get locked() { return this._locked }

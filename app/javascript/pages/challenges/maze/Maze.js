@@ -2,9 +2,11 @@ import { rand, sample, findMax } from "components/calc";
 
 import Cell from "pages/challenges/maze/Cell";
 import Walker from "pages/challenges/maze/Walker";
+import Player from "pages/challenges/maze/Player";
 import Direction from "pages/challenges/maze/Direction";
 
 export default class Maze {
+  static get instance() { return this._instance }
   static frameDelay         = 100
   static straightPreference = 4/1
   static branchBias         = 1/4
@@ -19,6 +21,7 @@ export default class Maze {
       first:    null, // First cell in the maze
       last:     null, // Last cell to be generated
       farthest: null,
+      finish:   null,
       walked:   new Set(),
       locked:   new Set(),
       walking:  new Set(),
@@ -32,6 +35,7 @@ export default class Maze {
       this.board[cell.y][cell.x] = cell
       return cell
     })
+    Maze._instance = this
 
     this.generate()
     this.spawnWalker(this.randCell())
@@ -116,6 +120,7 @@ export default class Maze {
       })
       boardEle.appendChild(rowEle)
     })
+    this.ele = boardEle
   }
 
   spawnWalker(cell) {
@@ -125,5 +130,14 @@ export default class Maze {
       cell.distance = 0
     }
     return this.walker = new Walker(this, cell)
+  }
+
+  spawnPlayer() {
+    new Player()
+  }
+
+  toggleClean(toggle) {
+    this.cleanCells = toggle === null ? !this.cleanCells : toggle
+    this.ele.classList.toggle("clean", this.cleanCells)
   }
 }

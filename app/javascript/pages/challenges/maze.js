@@ -35,6 +35,8 @@ maze.onComplete = () => {
   const endTime = currentTime()
   console.log("Completed", endTime)
   console.log("Duration: " + duration(startTime, endTime))
+
+  maze.farthest.finish = true
 }
 // window.maze = new Maze(10, 10)
 
@@ -46,13 +48,7 @@ document.addEventListener("click", (evt) => {
   }
 })
 
-const mazeWrapper = document.querySelector("#maze")
-let cleanCells = false
-const toggleClean = (toggle=null) => {
-  cleanCells = toggle === null ? !cleanCells : toggle
-  mazeWrapper.classList.toggle("clean", cleanCells)
-}
-Keyboard.on("Space", () => toggleClean())
+Keyboard.on("Space", () => maze.toggleClean())
 
 Keyboard.on("?", () => {
   console.log("Checking...")
@@ -63,4 +59,8 @@ Keyboard.on("?", () => {
     if (cell.bad) { data.invalid += 1 } else { data.valid += 1 }
   })
   console.log(data)
+})
+
+Keyboard.on("Enter", () => {
+  maze.player || maze.spawnPlayer()
 })

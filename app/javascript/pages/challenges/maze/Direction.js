@@ -1,8 +1,5 @@
 import { rand } from "components/calc";
 
-import Cell from "pages/challenges/maze/Cell";
-import Walker from "pages/challenges/maze/Walker";
-
 export default class Direction {
   static names = ["up", "right", "down", "left"]
   static arrows = ["↑", "→", "↓", "←"]
@@ -35,10 +32,10 @@ export default class Direction {
   static left()  { return this.directions[3] }
 
   from(x, y) {
-    if (x instanceof Walker) { return [this.x + x.x, this.y + x.y] }
-    if (x instanceof Cell) { return [this.x + x.x, this.y + x.y] }
+    if (typeof x === "number") { return [this.x + x, this.y + y] }
     if (Array.isArray(x)) { return [this.x + x[0], this.y + x[1]] }
-    return [this.x + x, this.y + y]
+
+    return [this.x + x.x, this.y + x.y]
   }
   get opposite() { return this._opposite = this._opposite || Direction.directions[(this.idx + 2) % 4] }
 }

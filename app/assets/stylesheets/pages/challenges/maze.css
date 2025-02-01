@@ -4,6 +4,16 @@ html:has(body[data-controller=challenges][data-action=maze]) {
   #maze {
     margin: 0 auto;
     padding: 50px;
+    position: relative;
+
+    .player {
+      margin: 54px; /* maze margin + cell.margin*2 */
+      position: absolute;
+      border-radius: 20px;
+      width: 15px;
+      height: 15px;
+      background: gold;
+    }
 
     .row {
       display: block;
@@ -44,6 +54,7 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       &.first,    &.first:before,    &.first:after    { background-color: green; }
       &.last,     &.last:before,     &.last:after     { background-color: purple; }
       &.farthest, &.farthest:before, &.farthest:after { background-color: brown; }
+      &.finish,   &.finish:before,   &.finish:after   { background-color: lime; }
       &.recount,  &.recount:before,  &.recount:after  { color: red; font-weight: bold; }
 
       .cell-content {
