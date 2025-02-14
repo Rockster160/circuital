@@ -1,6 +1,7 @@
 import Keyboard from "components/keyboard";
 import { currentTime, duration } from "components/helpers";
 import Maze from "pages/challenges/maze/Maze";
+import Solver from "pages/challenges/maze/Solver";
 
 Maze.frameDelay = 0
 
@@ -31,14 +32,18 @@ console.log("Started", startTime)
 
 // window.maze = new Maze(100, 50)
 window.maze = new Maze(45, 25)
+// window.maze = new Maze(10, 10)
+
 maze.onComplete = () => {
   const endTime = currentTime()
   console.log("Completed", endTime)
   console.log("Duration: " + duration(startTime, endTime))
 
+  maze.toggleClean(true)
   maze.farthest.finish = true
+  const solver = new Solver(maze)
+  solver.solve()
 }
-// window.maze = new Maze(10, 10)
 
 document.addEventListener("click", (evt) => {
   const cellEle = evt.target.closest(".cell")

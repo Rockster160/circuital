@@ -5,12 +5,9 @@ import Maze from "pages/challenges/maze/Maze";
 import Cell from "pages/challenges/maze/Cell";
 import Walker from "pages/challenges/maze/Walker";
 import Direction from "pages/challenges/maze/Direction";
+import { cellWidth, cellMargin, cellOffset } from "pages/challenges/maze/Maze";
 
-const cellWidth = 20
-const cellMargin = 2
-const cellOffset = (cellWidth + (cellMargin*2))
-
-const moveDelay = 75
+const moveDelay = 0
 
 export default class Player {
   static get instance() { return this._instance || (this._instance = new Player(Maze.instance)) }

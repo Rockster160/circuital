@@ -5,6 +5,10 @@ import Walker from "pages/challenges/maze/Walker";
 import Player from "pages/challenges/maze/Player";
 import Direction from "pages/challenges/maze/Direction";
 
+export const cellWidth = 20
+export const cellMargin = 2
+export const cellOffset = (cellWidth + (cellMargin*2))
+
 export default class Maze {
   static get instance() { return this._instance }
   static frameDelay         = 100

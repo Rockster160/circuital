@@ -102,6 +102,9 @@ export default class Cell {
     this.ele.classList.add(...classNames)
     return this
   }
+  hasClass(className) {
+    return this.ele.classList.contains(className)
+  }
   removeClass(...classNames) {
     this.ele.classList.remove(...classNames)
     return this
