@@ -6,7 +6,8 @@
 // import Walker from "pages/challenges/maze/Walker";
 // import Direction from "pages/challenges/maze/Direction";
 
-const moveDelay = 0
+const moveDelay = 50
+const walkDelay = 50
 
 export default class Solver {
   constructor(map) {
@@ -14,20 +15,39 @@ export default class Solver {
     this.startCell = map.first
     this.finishCell = map.finish
     this.walkers = []
-    this.moveInterval = undefined
+    this.solvedWalker = undefined
+    this.solveInterval = undefined
+    this.walkInterval = undefined
+
+    this.player = undefined
+    this.playerPath = undefined
   }
 
   solve() {
     console.log("Solving")
     const walker = new SolverWalker(this, [this.startCell])
-    this.moveInterval = setInterval(() => {
+    this.solveInterval = setInterval(() => {
       this.tick()
     }, moveDelay);
   }
 
+  walk() {
+    console.log("Walking")
+    if (!this.playerPath?.length) { return }
+    this.player.moveToCell(this.playerPath.shift())
+
+    setTimeout(() => this.walk(), walkDelay)
+  }
+
   complete(walker) {
+    this.solvedWalker = walker
+    clearInterval(this.solveInterval)
     console.log("Complete!", walker.distance, walker)
-    clearInterval(this.moveInterval)
+
+    this.player = this.map.player
+    this.playerPath = this.solvedWalker.path
+    console.log("Path", this.playerPath.length)
+    this.walk()
   }
 
   tick() {
@@ -56,8 +76,8 @@ class SolverWalker {
     if (!opts.length) { return this.dead() }
 
     const [mine, ...splits] = opts
-    this.move(mine)
     splits.forEach(splitCell => this.split(splitCell))
+    this.move(mine)
   }
 
   move(cell) {
@@ -69,6 +89,7 @@ class SolverWalker {
 
     if (cell.hasClass("finish")) {
       this.solver.complete(this)
+      this.path.forEach(cell => cell.addClass("path"))
     }
   }
 

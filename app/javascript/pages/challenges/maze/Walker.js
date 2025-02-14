@@ -19,18 +19,18 @@ export default class Walker {
     this.walk()
   }
 
-  static spawn(map) {
-    let availableCells = this.availableStartingCells()
-    if (availableCells.length == 0) { return map.connectIslands() }
+  // static spawn(map) {
+  //   let availableCells = this.availableStartingCells()
+  //   if (availableCells.length == 0) { return map.connectIslands() }
 
-    const cell = sample(availableCells)
-    map.spawnWalker(cell)
-    if (cell != maze.first) { cell.locked = true } // Leave possibility for start to branch out
-  }
+  //   const cell = sample(availableCells)
+  //   map.spawnWalker(cell)
+  //   if (cell != maze.first) { cell.locked = true } // Leave possibility for start to branch out
+  // }
 
-  static availableStartingCells() {
-    return [...this.walkedCells].filter((cell) => !cell.cascadeLock())
-  }
+  // static availableStartingCells() {
+  //   return [...this.walkedCells].filter((cell) => !cell.cascadeLock())
+  // }
 
   addCell(cell, dir, prevCell) {
     this.startDistance = this.startDistance || cell.distance || 0
@@ -40,7 +40,7 @@ export default class Walker {
     // Push after open so that first cell is 0 distance
     this.path.push(cell)
 
-    Walker.walkedCells.add(cell)
+    // Walker.walkedCells.add(cell)
     cell.walked = true
     cell.walker = true
     cell.walking = true
@@ -103,6 +103,7 @@ export default class Walker {
 
   die(msg) {
     this.path.forEach((cell) => cell.walking = false)
-    setTimeout(() => Walker.spawn(this.map), Maze.frameDelay);
+    this.walking = false
+    setTimeout(() => this.map.spawnWalker(), Maze.frameDelay);
   }
 }

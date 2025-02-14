@@ -7,14 +7,16 @@ import Walker from "pages/challenges/maze/Walker";
 import Direction from "pages/challenges/maze/Direction";
 import { cellWidth, cellMargin, cellOffset } from "pages/challenges/maze/Maze";
 
-const moveDelay = 0
+const moveDelay = 30
+const holdDelay = 100
 
 export default class Player {
   static get instance() { return this._instance || (this._instance = new Player(Maze.instance)) }
   static moveInterval = undefined
+  static moveTimeout = undefined
 
-  constructor() {
-    this.map = Maze.instance
+  constructor(maze) {
+    this.map = maze
     this.map.player = this
     this.generate()
     this.cell = this.map.first || this.map.randCell()
@@ -23,8 +25,11 @@ export default class Player {
   }
 
   static resetInterval() {
-    clearInterval(this.moveInterval)
-    this.moveInterval = setInterval(() => this.tick(), moveDelay);
+    this.stop()
+
+    this.moveTimeout = setTimeout(() => {
+      this.moveInterval = setInterval(() => this.tick(), moveDelay);
+    }, holdDelay-moveDelay);
   }
 
   static tick() {
@@ -40,6 +45,7 @@ export default class Player {
 
   static stop() {
     clearInterval(this.moveInterval)
+    clearTimeout(this.moveTimeout)
   }
 
   get direction() { return this._direction }
@@ -61,6 +67,11 @@ export default class Player {
     ;[this.x, this.y] = [cell.x, cell.y]
   }
 
+  moveToCell(cell) {
+    this.cell = cell
+    if (this.cell.finish) { this.win() }
+  }
+
   move(dir, run=false) {
     let nextCell = this.cell[dir.name]
     if (nextCell) {
@@ -69,8 +80,7 @@ export default class Player {
         while (forwardCell = nextCell[dir.name]) { nextCell = forwardCell }
       }
       this.direction = dir
-      this.cell = nextCell
-      if (this.cell.finish) { this.win() }
+      this.moveToCell(nextCell)
       return true
     }
   }
@@ -78,7 +88,7 @@ export default class Player {
   win() {
     if (this._win) { return }
     this._win = true
-    this.ele.style.background = "green"
+    this.ele.classList.add("winner")
     console.log("You won!")
   }
 
@@ -90,5 +100,5 @@ export default class Player {
 }
 
 Direction.directions.forEach(dir => {
-  Keyboard.on(dir.arrow, () => Player.move(dir))
+  Keyboard.on(dir.arrow, (evt) => Player.move(dir, Keyboard.isPressed("Shift")))
 })

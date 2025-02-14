@@ -124,6 +124,7 @@ export default class Cell {
   connect(dir, neighbor, nextDist=null) {
     this.walked = true
     neighbor = neighbor || this.neighbor(dir)
+    const shouldRecount = neighbor.walked
 
     if (!neighbor) { console.log("no neighbor", this); debugger }
     if (nextDist === null) {
@@ -141,7 +142,7 @@ export default class Cell {
 
     if (this.distance === null) {
       this.distance = nextDist
-    } else {
+    } else if (shouldRecount) {
       this.recountDistance()
     }
   }

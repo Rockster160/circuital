@@ -52,8 +52,11 @@ export default class Maze {
   get walked() { return this.cellCache.walked }     // cell list
   get locked() { return this.cellCache.locked }     // cell list
   get walking() { return this.cellCache.walking }   // cell list
-  get walkers() { return this.cellCache.walkers }     // cell list
+  get walkers() { return this.cellCache.walkers }   // cell list
   get islands() { return this.cellCache.islands }   // cell list
+
+  get player() { return this._player || new Player(this) }
+  set player(newPlayer) { this._player = newPlayer }
 
   unset(val) {
     const cell = this.cellCache[val]
@@ -75,6 +78,8 @@ export default class Maze {
   }
 
   connectIslands(islands=null) {
+    console.log("connectIslands", islands)
+    if (islands !== null && islands.length == 0) { islands = null } // Put deserted islands back in
     islands = islands === null ? this.islands : islands
     const cell = sample(islands)
     if (!cell) {
@@ -86,8 +91,8 @@ export default class Maze {
 
     cell.neighbors().forEach((neighbor) => {
       const connCount = neighbor.connections().length
-      if (connCount == 0) { return }
-      if (!isoConnCount || connCount < isoConnCount) {
+      if (connCount == 0) { return } // Another island
+      if (isoConnCount === null || connCount < isoConnCount) {
         connectableCells = [neighbor]
         isoConnCount = connCount
       } else if (connCount == isoConnCount) {
@@ -96,6 +101,7 @@ export default class Maze {
     })
 
     if (connectableCells.length == 0) { // Deserted island, retry to find one with connections
+      console.log("deserted island")
       const withoutSkipped = Array.from(islands).filter((iso) => iso != cell)
       return this.connectIslands(withoutSkipped)
     }
@@ -103,6 +109,7 @@ export default class Maze {
     const neighbor = sample(connectableCells)
     const isoDir = Direction.between(cell, neighbor)
     cell.connect(isoDir, neighbor, neighbor.distance+1)
+    console.log("island walker")
     this.spawnWalker(cell)
   }
 
@@ -127,17 +134,20 @@ export default class Maze {
     this.ele = boardEle
   }
 
+  randNextWalkerCell() {
+    return sample(Array.from(this.walked).filter(cell => !cell.cascadeLock()))
+  }
+
   spawnWalker(cell) {
-    cell = cell || this.randCell()
+    cell = cell || (this.first ? this.randNextWalkerCell() : this.randCell())
+    if (!cell) { return this.connectIslands() }
     if (!this.first) {
       cell.first = true
       cell.distance = 0
+    } else {
+      cell.locked = true
     }
     return this.walker = new Walker(this, cell)
-  }
-
-  spawnPlayer() {
-    new Player()
   }
 
   toggleClean(toggle) {

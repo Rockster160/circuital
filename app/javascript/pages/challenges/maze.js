@@ -67,5 +67,5 @@ Keyboard.on("?", () => {
 })
 
 Keyboard.on("Enter", () => {
-  maze.player || maze.spawnPlayer()
+  maze.spawnPlayer()
 })

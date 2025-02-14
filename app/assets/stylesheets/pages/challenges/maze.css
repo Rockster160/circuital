@@ -13,6 +13,10 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       width: 15px;
       height: 15px;
       background: gold;
+
+      &.winner {
+        background: #0160FF;
+      }
     }
 
     .row {
@@ -51,12 +55,13 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       &.locked,   &.locked:before,   &.locked:after   { background-color: blue; }
       &.walking,  &.walking:before,  &.walking:after  { background-color: darkgrey; }
       &.walker,   &.walker:before,   &.walker:after   { background-color: orange; }
-      &.solver,   &.solver:before,   &.solver:after   { background-color: red; }
       &.first,    &.first:before,    &.first:after    { background-color: green; }
       &.last,     &.last:before,     &.last:after     { background-color: purple; }
       &.farthest, &.farthest:before, &.farthest:after { background-color: brown; }
       &.finish,   &.finish:before,   &.finish:after   { background-color: lime; }
       &.recount,  &.recount:before,  &.recount:after  { color: red; font-weight: bold; }
+      &.solver,   &.solver:before,   &.solver:after   { background-color: darkgrey; }
+      &.path,     &.path:before,     &.path:after     { background-color: #0160FF; }
 
       .cell-content {
         position: absolute;
@@ -69,10 +74,12 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       }
     }
 
-    &.clean .cell:not(.finish):not(.first) {
-      /* Same color as walked class, but defined at the end for specificity */
-      &, &:before, &:after { background-color: #0160FF; }
-      &.solver,   &.solver:before,   &.solver:after   { background-color: red; }
+    &.clean .cell {
+      &, &:before, &:after { background-color: grey; }
+      &.solver, &.solver:before, &.solver:after { background-color: darkgrey; }
+      &.path, &.path:before, &.path:after { background-color: #206020; }
+      &.first, &.first:before, &.first:after { background-color: green; }
+      &.finish, &.finish:before, &.finish:after { background-color: green; }
 
       .cell-content {
         display: none;
