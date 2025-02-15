@@ -1,11 +1,3 @@
-// import { rand, randf, rand1In, weightedChoice, tally, minMax, oddsOf, sample, findMin, findMax } from "components/calc";
-
-// import Keyboard from "components/keyboard";
-// import Maze from "pages/challenges/maze/Maze";
-// import Cell from "pages/challenges/maze/Cell";
-// import Walker from "pages/challenges/maze/Walker";
-// import Direction from "pages/challenges/maze/Direction";
-
 const moveDelay = 50
 const walkDelay = 50
 
@@ -24,15 +16,17 @@ export default class Solver {
   }
 
   solve() {
-    console.log("Solving")
     const walker = new SolverWalker(this, [this.startCell])
     this.solveInterval = setInterval(() => {
       this.tick()
     }, moveDelay);
   }
 
+  tick() {
+    this.walkers.forEach(walker => walker.tick())
+  }
+
   walk() {
-    console.log("Walking")
     if (!this.playerPath?.length) { return }
     this.player.moveToCell(this.playerPath.shift())
 
@@ -42,16 +36,10 @@ export default class Solver {
   complete(walker) {
     this.solvedWalker = walker
     clearInterval(this.solveInterval)
-    console.log("Complete!", walker.distance, walker)
 
     this.player = this.map.player
     this.playerPath = this.solvedWalker.path
-    console.log("Path", this.playerPath.length)
     this.walk()
-  }
-
-  tick() {
-    this.walkers.forEach(walker => walker.tick())
   }
 }
 

@@ -50,7 +50,7 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       &[data-up]:after { top: -5px; }
       &[data-down]:after { bottom: -5px; }
 
-      &,          &:before,          &:after          { background-color: grey; }
+      &,          &:before,          &:after          { background-color: #303030; }
       &.walked,   &.walked:before,   &.walked:after   { background-color: #0160FF; }
       &.locked,   &.locked:before,   &.locked:after   { background-color: blue; }
       &.walking,  &.walking:before,  &.walking:after  { background-color: darkgrey; }

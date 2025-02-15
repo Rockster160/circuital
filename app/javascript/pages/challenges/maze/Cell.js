@@ -22,9 +22,9 @@ export default class Cell {
 
   setMapSingle(val, bool) {
     if (this["_" + val] === bool) { return }
-    const mapValCell = this.map.cellCache[val]
+    const otherCell = this.map.cellCache[val]
     if (bool) {
-      if (mapValCell) { mapValCell[val] = false }
+      if (otherCell) { otherCell[val] = false }
       this.map.cellCache[val] = this
       this.addClass(val)
     } else {
@@ -86,10 +86,7 @@ export default class Cell {
   }
 
   set content(content) {
-    const div = document.createElement("div")
-    div.classList.add("cell-content")
-    div.innerHTML = content
-    this.ele.innerHTML = div.outerHTML
+    this.innerContent.innerHTML = content
   }
 
   static addClass(...classNames) {

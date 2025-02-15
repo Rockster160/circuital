@@ -1,7 +1,16 @@
 import Keyboard from "components/keyboard";
+import Timer from "components/Timer";
 import { currentTime, duration } from "components/helpers";
 import Maze from "pages/challenges/maze/Maze";
 import Solver from "pages/challenges/maze/Solver";
+
+const params = window.location.search.split(/[\?\&]/).reduce((acc, str) => {
+  if (str && str.includes("=")) {
+    const [k,v] = str.split("=")
+    acc[k] = v
+  }
+  return acc
+}, {})
 
 Maze.frameDelay = 0
 
@@ -30,9 +39,13 @@ Maze.loopProbability = 1/4 // (1/4)
 const startTime = currentTime()
 console.log("Started", startTime)
 
-// window.maze = new Maze(100, 50)
-window.maze = new Maze(45, 25)
-// window.maze = new Maze(10, 10)
+window.timer = new Timer()
+
+if (params.width && params.height) {
+  window.maze = new Maze(parseInt(params.width), parseInt(params.height))
+} else {
+  window.maze = new Maze(10, 10)
+}
 
 maze.onComplete = () => {
   const endTime = currentTime()
@@ -41,8 +54,7 @@ maze.onComplete = () => {
 
   maze.toggleClean(true)
   maze.farthest.finish = true
-  const solver = new Solver(maze)
-  solver.solve()
+  timer.log()
 }
 
 document.addEventListener("click", (evt) => {
@@ -67,5 +79,6 @@ Keyboard.on("?", () => {
 })
 
 Keyboard.on("Enter", () => {
-  maze.spawnPlayer()
+  const solver = new Solver(maze)
+  solver.solve()
 })

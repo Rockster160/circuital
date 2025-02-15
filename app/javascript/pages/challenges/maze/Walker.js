@@ -1,4 +1,4 @@
-import { weightedChoice, oddsOf, sample } from "components/calc";
+import { weightedChoice, oddsOf, avg } from "components/calc";
 
 import Maze from "pages/challenges/maze/Maze";
 import Direction from "pages/challenges/maze/Direction";
@@ -19,19 +19,6 @@ export default class Walker {
     this.walk()
   }
 
-  // static spawn(map) {
-  //   let availableCells = this.availableStartingCells()
-  //   if (availableCells.length == 0) { return map.connectIslands() }
-
-  //   const cell = sample(availableCells)
-  //   map.spawnWalker(cell)
-  //   if (cell != maze.first) { cell.locked = true } // Leave possibility for start to branch out
-  // }
-
-  // static availableStartingCells() {
-  //   return [...this.walkedCells].filter((cell) => !cell.cascadeLock())
-  // }
-
   addCell(cell, dir, prevCell) {
     this.startDistance = this.startDistance || cell.distance || 0
     if (dir && prevCell) {
@@ -40,7 +27,6 @@ export default class Walker {
     // Push after open so that first cell is 0 distance
     this.path.push(cell)
 
-    // Walker.walkedCells.add(cell)
     cell.walked = true
     cell.walker = true
     cell.walking = true

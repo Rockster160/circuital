@@ -70,6 +70,7 @@ export default class Maze {
   randCell() { return this.cells[rand(this.cells.length)] }
 
   findFarthestCell() {
+    console.log("FindFarthest")
     const farthest = findMax(this.walked, (cell) => cell.distance)
     if (farthest) {
       this.farthestDist = farthest.distance
@@ -78,7 +79,6 @@ export default class Maze {
   }
 
   connectIslands(islands=null) {
-    console.log("connectIslands", islands)
     if (islands !== null && islands.length == 0) { islands = null } // Put deserted islands back in
     islands = islands === null ? this.islands : islands
     const cell = sample(islands)
@@ -101,7 +101,6 @@ export default class Maze {
     })
 
     if (connectableCells.length == 0) { // Deserted island, retry to find one with connections
-      console.log("deserted island")
       const withoutSkipped = Array.from(islands).filter((iso) => iso != cell)
       return this.connectIslands(withoutSkipped)
     }
@@ -109,7 +108,6 @@ export default class Maze {
     const neighbor = sample(connectableCells)
     const isoDir = Direction.between(cell, neighbor)
     cell.connect(isoDir, neighbor, neighbor.distance+1)
-    console.log("island walker")
     this.spawnWalker(cell)
   }
 
@@ -121,11 +119,15 @@ export default class Maze {
       let rowEle = document.createElement("div")
       rowEle.classList.add("row")
       row.forEach((cell) => {
-        let cellEle = document.createElement("div")
+        const cellEle = document.createElement("div")
         cellEle.classList.add("cell")
         cellEle.dataset.x = cell.x
         cellEle.dataset.y = cell.y
+        const cellInnerEle = document.createElement("div")
+        cellInnerEle.classList.add("cell-content")
+        cellEle.appendChild(cellInnerEle)
         rowEle.appendChild(cellEle)
+        cell.innerContent = cellInnerEle
         cell.ele = cellEle
         cell.island = true
       })

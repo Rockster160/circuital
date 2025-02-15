@@ -110,3 +110,8 @@ export const findMax = (arr, fn) => {
   })
   return maxItem
 }
+
+export const avg = (items) => {
+  if (items.length === 0) { return 0 }
+  return items.reduce((sum, time) => sum + time, 0) / items.length;
+}
