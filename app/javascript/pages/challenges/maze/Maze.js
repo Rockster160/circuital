@@ -42,7 +42,6 @@ export default class Maze {
     Maze._instance = this
 
     this.generate()
-    this.spawnWalker(this.randCell())
   }
 
   get first() { return this.cellCache.first }       // single cell

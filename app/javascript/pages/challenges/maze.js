@@ -2,6 +2,7 @@ import Keyboard from "components/keyboard";
 import Timer from "components/Timer";
 import { currentTime, duration } from "components/helpers";
 import Maze from "pages/challenges/maze/Maze";
+import FetchMaze from "pages/challenges/maze/FetchMaze";
 import Solver from "pages/challenges/maze/Solver";
 
 const params = window.location.search.split(/[\?\&]/).reduce((acc, str) => {
@@ -40,11 +41,16 @@ const startTime = currentTime()
 console.log("Started", startTime)
 
 window.timer = new Timer()
+let fetcher = undefined
 
+if (params.width && !params.height) { params.height = params.width }
+if (params.height && !params.width) { params.width = params.height }
 if (params.width && params.height) {
   window.maze = new Maze(parseInt(params.width), parseInt(params.height))
+  maze.spawnWalker()
 } else {
-  window.maze = new Maze(10, 10)
+  fetcher = await FetchMaze.generate()
+  window.maze = fetcher.maze
 }
 
 maze.onComplete = () => {
@@ -54,7 +60,6 @@ maze.onComplete = () => {
 
   maze.toggleClean(true)
   maze.farthest.finish = true
-  timer.log()
 }
 
 document.addEventListener("click", (evt) => {
@@ -80,5 +85,9 @@ Keyboard.on("?", () => {
 
 Keyboard.on("Enter", () => {
   const solver = new Solver(maze)
-  solver.solve()
+  solver.solve(() => fetcher?.submit(solver))
+})
+
+Keyboard.on("e", () => {
+  maze.player
 })

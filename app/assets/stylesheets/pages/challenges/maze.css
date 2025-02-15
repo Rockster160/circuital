@@ -74,12 +74,12 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       }
     }
 
-    &.clean .cell {
+    &.clean .cell.walked {
       &, &:before, &:after { background-color: grey; }
       &.solver, &.solver:before, &.solver:after { background-color: darkgrey; }
       &.path, &.path:before, &.path:after { background-color: #206020; }
       &.first, &.first:before, &.first:after { background-color: green; }
-      &.finish, &.finish:before, &.finish:after { background-color: green; }
+      &.finish, &.finish:before, &.finish:after { background-color: limegreen; }
 
       .cell-content {
         display: none;

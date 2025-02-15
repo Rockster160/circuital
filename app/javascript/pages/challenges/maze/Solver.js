@@ -13,9 +13,12 @@ export default class Solver {
 
     this.player = undefined
     this.playerPath = undefined
+
+    this.callback = undefined
   }
 
-  solve() {
+  solve(callback) {
+    this.callback = callback
     const walker = new SolverWalker(this, [this.startCell])
     this.solveInterval = setInterval(() => {
       this.tick()
@@ -27,7 +30,10 @@ export default class Solver {
   }
 
   walk() {
-    if (!this.playerPath?.length) { return }
+    if (!this.playerPath?.length) {
+      this.callback?.(this)
+      return
+    }
     this.player.moveToCell(this.playerPath.shift())
 
     setTimeout(() => this.walk(), walkDelay)
@@ -38,7 +44,7 @@ export default class Solver {
     clearInterval(this.solveInterval)
 
     this.player = this.map.player
-    this.playerPath = this.solvedWalker.path
+    this.playerPath = [...this.solvedWalker.path]
     this.walk()
   }
 }
