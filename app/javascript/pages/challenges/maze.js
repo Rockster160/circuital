@@ -4,6 +4,9 @@ import { currentTime, duration } from "components/helpers";
 import Maze from "pages/challenges/maze/Maze";
 import FetchMaze from "pages/challenges/maze/FetchMaze";
 import Solver from "pages/challenges/maze/Solver";
+import { rand } from "components/calc";
+import Key from "pages/challenges/maze/Key";
+import Door from "pages/challenges/maze/Door";
 
 const params = window.location.search.split(/[\?\&]/).reduce((acc, str) => {
   if (str && str.includes("=")) {
@@ -52,6 +55,18 @@ if (params.width && params.height) {
   fetcher = await FetchMaze.generate()
   window.maze = fetcher.maze
 }
+
+const code = Math.random().toString(36).slice(2, 6).toUpperCase()
+const key = new Key(code)
+const door = new Door(code)
+
+const keyCell = Array.from(maze.walked)[rand(maze.walked.size)]
+keyCell.key = key
+console.log(keyCell, key)
+
+const doorCell = Array.from(maze.walked)[rand(maze.walked.size)]
+doorCell.door = door
+console.log(doorCell, door)
 
 maze.onComplete = () => {
   const endTime = currentTime()

@@ -21,6 +21,7 @@ export default class Player {
     this.generate()
     this.cell = this.map.first || this.map.randCell()
     this._direction = null
+    this.keys = new Set()
     Player._instance = this
   }
 
@@ -75,12 +76,32 @@ export default class Player {
   move(dir, run=false) {
     let nextCell = this.cell[dir.name]
     if (nextCell) {
+      if (nextCell.key) {
+        this.keys.add(nextCell.key)
+        nextCell.key = null
+      }
+
+      if (nextCell.door) {
+        const correctKey = Array.from(this.keys).find(inventoryKey => {
+          return inventoryKey.code === nextCell.door.code
+        })
+
+        if (correctKey) {
+          this.keys.delete(correctKey)
+          nextCell.door = null
+        } else {
+          return false
+        }
+      }
+
       if (run) {
         let forwardCell
         while (forwardCell = nextCell[dir.name]) { nextCell = forwardCell }
       }
+
       this.direction = dir
       this.moveToCell(nextCell)
+
       return true
     }
   }

@@ -59,7 +59,7 @@ export default class FetchMaze {
   }
 
   post(moves) {
-    fetch(`https://ardesian.com/maze/${this.seed}/solve`, {
+    fetch(`https://ardesian.com/maze/${this.seed}/solve?width=10&height=10`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ moves }),
@@ -79,7 +79,7 @@ export default class FetchMaze {
   }
 
   async fetch() {
-    const res = await fetch("https://ardesian.com/maze")
+    const res = await fetch("https://ardesian.com/maze?width=10&height=10")
     this.seed = res.headers.get("X-Maze-Seed")
     const text = await res.text()
     const rows = text.split("\n")

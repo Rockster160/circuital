@@ -50,6 +50,7 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       &[data-up]:after { top: -5px; }
       &[data-down]:after { bottom: -5px; }
 
+      /* Generating Maze */
       &,          &:before,          &:after          { background-color: #303030; }
       &.walked,   &.walked:before,   &.walked:after   { background-color: #0160FF; }
       &.locked,   &.locked:before,   &.locked:after   { background-color: blue; }
@@ -74,12 +75,15 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       }
     }
 
+    /* Playable maze */
     &.clean .cell.walked {
       &, &:before, &:after { background-color: grey; }
       &.solver, &.solver:before, &.solver:after { background-color: darkgrey; }
       &.path, &.path:before, &.path:after { background-color: #206020; }
       &.first, &.first:before, &.first:after { background-color: green; }
       &.finish, &.finish:before, &.finish:after { background-color: limegreen; }
+      &.key, &.key:before, &.key:after { background-color: #FF8000; }
+      &.door, &.door:before, &.door:after { background-color: #FF8099; }
 
       .cell-content {
         display: none;

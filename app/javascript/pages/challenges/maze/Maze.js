@@ -31,6 +31,7 @@ export default class Maze {
       walking:  new Set(),
       walkers:  new Set(),
       islands:  new Set(),
+      keys:     new Set(),
     }
     this.board = [] // Array of arrays of cells, corresponding with layout
     this.cells = Array.from({ length: width * height }, (_, idx) => {
@@ -53,6 +54,7 @@ export default class Maze {
   get walking() { return this.cellCache.walking }   // cell list
   get walkers() { return this.cellCache.walkers }   // cell list
   get islands() { return this.cellCache.islands }   // cell list
+  get keys() { return this.cellCache.keys }         // cell list
 
   get player() { return this._player || new Player(this) }
   set player(newPlayer) { this._player = newPlayer }

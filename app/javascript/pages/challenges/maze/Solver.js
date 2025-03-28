@@ -1,5 +1,5 @@
 const moveDelay = 50
-const walkDelay = 50
+const walkDelay = 200
 
 export default class Solver {
   constructor(map) {

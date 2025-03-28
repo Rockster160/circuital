@@ -18,6 +18,9 @@ export default class Cell {
 
     this._neighbors = null
     this.map = map
+
+    this._key = null
+    this._door = null
   }
 
   setMapSingle(val, bool) {
@@ -71,6 +74,20 @@ export default class Cell {
   set walking(bool) { this.setMapSet("walking", bool) }
   set walker(bool) { this.setMapSet("walkers", bool) }
   set island(bool) { this.setMapSet("islands", bool) }
+
+  get key() { return this._key }
+  set key(keyObject) {
+    this._key = keyObject
+    console.log(this.x, this.y, this)
+    keyObject ? this.addClass("key") : this.removeClass("key")
+  }
+
+  get door() { return this._door }
+  set door(doorObject) {
+    this._door = doorObject
+    console.log(this.x, this.y, this)
+    doorObject ? this.addClass("door") : this.removeClass("door")
+  }
 
   get distance() { return this._distance }
   set distance(val) {
