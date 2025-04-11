@@ -12,7 +12,7 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       border-radius: 20px;
       width: 15px;
       height: 15px;
-      background: gold;
+      background: #0160FF;
 
       &.winner {
         background: #0160FF;
@@ -82,8 +82,8 @@ html:has(body[data-controller=challenges][data-action=maze]) {
       &.path, &.path:before, &.path:after { background-color: #206020; }
       &.first, &.first:before, &.first:after { background-color: green; }
       &.finish, &.finish:before, &.finish:after { background-color: limegreen; }
-      &.key, &.key:before, &.key:after { background-color: #FF8000; }
-      &.door, &.door:before, &.door:after { background-color: #FF8099; }
+      &.key, &.key:before, &.key:after { background-color: gold; }
+      &.door, &.door:before, &.door:after { background-color: brown; }
 
       .cell-content {
         display: none;

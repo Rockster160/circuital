@@ -47,6 +47,7 @@ export default class Maze {
 
   get first() { return this.cellCache.first }       // single cell
   get last() { return this.cellCache.last }         // single cell
+  get finish() { return this.cellCache.finish }         // single cell
   get farthest() { return this.cellCache.farthest || this.findFarthestCell() } // single cell
 
   get walked() { return this.cellCache.walked }     // cell list

@@ -1,51 +1,43 @@
-const moveDelay = 50
-const walkDelay = 200
+import Cell from "pages/challenges/maze/Cell";
 
 export default class Solver {
-  constructor(map) {
+  constructor(map, opts={}) {
     this.map = map
-    this.startCell = map.first
-    this.finishCell = map.finish
+    Cell.removeClass("solver")
+
+    this.startCell = opts.startCell || map.first
+    this.finishCell = opts.finishCell || map.finish
     this.walkers = []
     this.solvedWalker = undefined
-    this.solveInterval = undefined
-    this.walkInterval = undefined
-
-    this.player = undefined
-    this.playerPath = undefined
 
     this.callback = undefined
   }
 
-  solve(callback) {
+  async solve(callback) {
     this.callback = callback
     const walker = new SolverWalker(this, [this.startCell])
-    this.solveInterval = setInterval(() => {
+    while (!this.solvedWalker) {
       this.tick()
-    }, moveDelay);
+    }
+  }
+
+  cells() {
+    const cellsList = new Set()
+    this.walkers.forEach((walker) => {
+      walker.path.forEach((cell) => {
+        cellsList.add(cell)
+      })
+    })
+    return cellsList
   }
 
   tick() {
     this.walkers.forEach(walker => walker.tick())
   }
 
-  walk() {
-    if (!this.playerPath?.length) {
-      this.callback?.(this)
-      return
-    }
-    this.player.moveToCell(this.playerPath.shift())
-
-    setTimeout(() => this.walk(), walkDelay)
-  }
-
   complete(walker) {
     this.solvedWalker = walker
-    clearInterval(this.solveInterval)
-
-    this.player = this.map.player
-    this.playerPath = [...this.solvedWalker.path]
-    this.walk()
+    this.callback?.(this)
   }
 }
 
@@ -81,7 +73,7 @@ class SolverWalker {
     this.path = [...this.path, cell]
     this.distance = this.path.length
 
-    if (cell.hasClass("finish")) {
+    if (cell === this.solver.finishCell) {
       this.solver.complete(this)
       this.path.forEach(cell => cell.addClass("path"))
     }

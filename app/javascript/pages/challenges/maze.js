@@ -56,17 +56,58 @@ if (params.width && params.height) {
   window.maze = fetcher.maze
 }
 
-const code = Math.random().toString(36).slice(2, 6).toUpperCase()
-const key = new Key(code)
-const door = new Door(code)
+const solveToCell = async function(finishCell) {
+  const solver = new Solver(maze, { finishCell })
+  let solvedCell = undefined
+  await solver.solve(() => {
+    console.log("Solver Done!")
+    const cells = solver.solvedWalker.path
+    console.log("length", cells.length)
+    solvedCell = Array.from(cells)[rand(cells.length)]
+  })
 
-const keyCell = Array.from(maze.walked)[rand(maze.walked.size)]
-keyCell.key = key
-console.log(keyCell, key)
+  return solvedCell
+}
 
-const doorCell = Array.from(maze.walked)[rand(maze.walked.size)]
-doorCell.door = door
-console.log(doorCell, door)
+// const whatever = async function() {
+  const code = Math.random().toString(36).slice(2, 6).toUpperCase()
+  const key = new Key(code)
+  const door = new Door(code)
+
+  const finish = maze.finish
+  const doorCell = await solveToCell(finish)
+  const keyCell = await solveToCell(doorCell)
+  doorCell.door = door
+  keyCell.key = key
+//   const door_solver = new Solver(maze, { finishCell: finish })
+//   await door_solver.solve(() => {
+//     console.log("Door Solver Done!")
+//     const cells = door_solver.solvedWalker.path
+//     debugger
+//     const cell = Array.from(cells)[rand(cells.size)]
+//     cell.door = door
+
+//     return cell
+//   })
+
+  // const doorIndex = rand(maze.walked.size)
+  // const doorCell = Array.from(maze.walked)[doorIndex]
+  // doorCell.door = door
+  // console.log(doorCell, door)
+
+  // const new_solver = new Solver(maze, { finishCell: doorCell })
+  // console.log("Solving")
+  // await new_solver.solve(() => {
+  //   console.log("Done!")
+  //   const cells = new_solver.cells()
+
+  //   const keyCell = Array.from(cells)[rand(cells.size)]
+  //   keyCell.key = key
+  //   console.log(keyCell, key)
+  // })
+  // console.log("Async")
+// }
+// whatever();
 
 maze.onComplete = () => {
   const endTime = currentTime()
